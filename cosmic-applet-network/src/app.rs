@@ -737,7 +737,7 @@ impl cosmic::Application for CosmicNetworkApplet {
                         let uuid = uuid::Uuid::new_v4().to_string().replace("-", "_");
 
                         let my_id = format!(
-                            "com.system76.CosmicSettings.Applet._{uuid}.NetworkManager.SecretAgent",
+                            "fun.wmde.Settings.Applet._{uuid}.NetworkManager.SecretAgent",
                         );
                         tasks.push(
                             secret_agent_task(my_id)
@@ -870,7 +870,7 @@ impl cosmic::Application for CosmicNetworkApplet {
                 }
             }
             Message::OpenSettings => {
-                let exec = "cosmic-settings network".to_string();
+                let exec = "wmde-settings network".to_string();
                 if let Some(tx) = self.token_tx.as_ref() {
                     let _ = tx.send(TokenRequest {
                         app_id: Self::APP_ID.to_string(),
@@ -886,7 +886,7 @@ impl cosmic::Application for CosmicNetworkApplet {
                     self.token_tx = None;
                 }
                 TokenUpdate::ActivationToken { token, .. } => {
-                    let mut cmd = std::process::Command::new("cosmic-settings");
+                    let mut cmd = std::process::Command::new("wmde-settings");
                     cmd.arg("network");
                     if let Some(token) = token {
                         cmd.env("XDG_ACTIVATION_TOKEN", &token);

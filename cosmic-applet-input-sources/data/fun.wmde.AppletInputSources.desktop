@@ -2,11 +2,11 @@
 Name=Input Sources
 Comment=Switch between input sources
 Type=Application
-Exec=cosmic-applet-input-sources
+Exec=wmde-applet-input-sources
 Terminal=false
 Categories=COSMIC;
 Keywords=COSMIC;Applet;Input;Source;
-Icon=com.system76.CosmicAppletInputSources-symbolic
+Icon=fun.wmde.AppletInputSources-symbolic
 StartupNotify=true
 NoDisplay=true
 X-CosmicApplet=true

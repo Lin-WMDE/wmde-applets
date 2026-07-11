@@ -2,7 +2,7 @@
 Name=Accessibility
 Comment=Configure accessibility settings from the panel
 Type=Application
-Exec=cosmic-applet-a11y
+Exec=wmde-applet-a11y
 Terminal=false
 Categories=COSMIC;
 Keywords=COSMIC;Applet;Accessibility;A11y;Screen;Reader;Magnifier;Contrast;Color;

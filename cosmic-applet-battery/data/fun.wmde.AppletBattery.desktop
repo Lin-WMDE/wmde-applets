@@ -2,11 +2,11 @@
 Name=Power & Battery
 Comment=Power modes and power saving options
 Type=Application
-Exec=cosmic-applet-battery
+Exec=wmde-applet-battery
 Terminal=false
 Categories=COSMIC;
 Keywords=COSMIC;Applet;Power;Battery;
-Icon=com.system76.CosmicAppletBattery-symbolic
+Icon=fun.wmde.AppletBattery-symbolic
 StartupNotify=true
 NoDisplay=true
 X-CosmicApplet=true

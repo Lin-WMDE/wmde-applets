@@ -2,11 +2,11 @@
 Name=Minimized Windows
 Comment=Manage minimized windows
 Type=Application
-Exec=cosmic-applet-minimize
+Exec=wmde-applet-minimize
 Terminal=false
 Categories=COSMIC;
 Keywords=COSMIC;Applet;Minimize;
-Icon=com.system76.CosmicAppletMinimize
+Icon=fun.wmde.AppletMinimize
 StartupNotify=true
 NoDisplay=true
 X-CosmicApplet=true

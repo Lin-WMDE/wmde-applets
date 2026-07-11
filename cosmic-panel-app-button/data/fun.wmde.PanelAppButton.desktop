@@ -2,11 +2,11 @@
 Name=App Library Button
 Comment=Open the application library for launching installed applications
 Type=Application
-Exec=cosmic-panel-button com.system76.CosmicAppLibrary
+Exec=wmde-panel-button com.system76.CosmicAppLibrary
 Terminal=false
 Categories=COSMIC;
 Keywords=COSMIC;Applet;App;Library;Tray;
-Icon=com.system76.CosmicPanelAppButton
+Icon=fun.wmde.PanelAppButton
 StartupNotify=true
 NoDisplay=true
 X-CosmicApplet=true

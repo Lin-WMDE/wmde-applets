@@ -2,11 +2,11 @@
 Name=Tiling
 Comment=Manage the active hint, current & per-workspace auto-tiling
 Type=Application
-Exec=cosmic-applet-tiling
+Exec=wmde-applet-tiling
 Terminal=false
 Categories=COSMIC;
 Keywords=COSMIC;Applet;Tiling;Hint;Workspace;
-Icon=com.system76.CosmicAppletTiling-symbolic
+Icon=fun.wmde.AppletTiling-symbolic
 StartupNotify=true
 NoDisplay=true
 X-CosmicApplet=true

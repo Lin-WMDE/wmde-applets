@@ -54,11 +54,11 @@ struct Notifications {
 impl Notifications {
     fn update_icon(&mut self) {
         self.icon_name = if self.config.do_not_disturb {
-            "cosmic-applet-notification-disabled-symbolic"
+            "wmde-applet-notification-disabled-symbolic"
         } else if self.cards.is_empty() {
-            "cosmic-applet-notification-symbolic"
+            "wmde-applet-notification-symbolic"
         } else {
-            "cosmic-applet-notification-new-symbolic"
+            "wmde-applet-notification-new-symbolic"
         }
         .to_string();
     }
@@ -85,7 +85,7 @@ impl cosmic::Application for Notifications {
     type Message = Message;
     type Executor = cosmic::SingleThreadExecutor;
     type Flags = ();
-    const APP_ID: &'static str = "com.system76.CosmicAppletNotifications";
+    const APP_ID: &'static str = "fun.wmde.AppletNotifications";
 
     fn init(core: cosmic::app::Core, _flags: Self::Flags) -> (Self, app::Task<Self::Message>) {
         let helper = Config::new(
@@ -301,7 +301,7 @@ impl cosmic::Application for Notifications {
                 }
             }
             Message::OpenSettings => {
-                let exec = "cosmic-settings notifications".to_string();
+                let exec = "wmde-settings notifications".to_string();
                 if let Some(tx) = self.token_tx.as_ref() {
                     let _ = tx.send(TokenRequest {
                         app_id: Self::APP_ID.to_string(),
@@ -317,7 +317,7 @@ impl cosmic::Application for Notifications {
                     self.token_tx = None;
                 }
                 TokenUpdate::ActivationToken { token, .. } => {
-                    let mut cmd = std::process::Command::new("cosmic-settings");
+                    let mut cmd = std::process::Command::new("wmde-settings");
                     cmd.arg("notifications");
                     if let Some(token) = token {
                         cmd.env("XDG_ACTIVATION_TOKEN", &token);
@@ -402,7 +402,7 @@ impl cosmic::Application for Notifications {
             row![
                 container(
                     column![
-                        text_icon("cosmic-applet-notification-symbolic", 40),
+                        text_icon("wmde-applet-notification-symbolic", 40),
                         text::body(no_notifications)
                     ]
                     .align_x(Alignment::Center)

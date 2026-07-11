@@ -57,7 +57,7 @@ pub struct Audio {
     core: cosmic::app::Core,
     /// Track the applet's popup window.
     popup: Option<window::Id>,
-    /// Varlink connection to `com.system76.CosmicSettings.Audio`.
+    /// Varlink connection to `fun.wmde.Settings.Audio`.
     audio_client: Option<Rc<RefCell<audio_client::Client>>>,
     /// Known audio device state
     model: model::Model,
@@ -75,7 +75,7 @@ pub struct Audio {
     config: AudioAppletConfig,
     /// mpris player status
     player_status: Option<mpris_subscription::PlayerStatus>,
-    /// Used to request an activation token for opening cosmic-settings.
+    /// Used to request an activation token for opening wmde-settings.
     token_tx: Option<calloop::channel::Sender<TokenRequest>>,
     rectangle_tracker: Option<RectangleTracker<u32>>,
     rectangle: Option<iced::Rectangle>,
@@ -123,7 +123,7 @@ enum IsOpen {
 
 #[derive(Clone, Debug)]
 pub enum Message {
-    /// Connection to `com.system76.CosmicSettings`.
+    /// Connection to `fun.wmde.Settings`.
     Client(Arc<audio_client::Client>),
     Ignore,
     SetSinkVolume(u32),
@@ -253,7 +253,7 @@ impl cosmic::Application for Audio {
     type Message = Message;
     type Executor = cosmic::SingleThreadExecutor;
     type Flags = ();
-    const APP_ID: &'static str = "com.system76.CosmicAppletAudio";
+    const APP_ID: &'static str = "fun.wmde.AppletAudio";
 
     fn init(core: cosmic::app::Core, _flags: ()) -> (Self, app::Task<Message>) {
         (
@@ -483,7 +483,7 @@ impl cosmic::Application for Audio {
                 };
             }
             Message::OpenSettings => {
-                let exec = "cosmic-settings sound".to_string();
+                let exec = "wmde-settings sound".to_string();
                 if let Some(tx) = self.token_tx.as_ref() {
                     let _ = tx.send(TokenRequest {
                         app_id: Self::APP_ID.to_string(),
@@ -501,7 +501,7 @@ impl cosmic::Application for Audio {
                     self.token_tx = None;
                 }
                 TokenUpdate::ActivationToken { token, .. } => {
-                    let mut cmd = std::process::Command::new("cosmic-settings");
+                    let mut cmd = std::process::Command::new("wmde-settings");
                     cmd.arg("sound");
                     if let Some(token) = token {
                         cmd.env("XDG_ACTIVATION_TOKEN", &token);
@@ -548,12 +548,12 @@ impl cosmic::Application for Audio {
                                         && why.kind() == std::io::ErrorKind::NotFound
                                     {
                                         tracing::error!(
-                                            "cosmic-settings-daemon varlink service not found."
+                                            "wmde-settings-daemon varlink service not found."
                                         );
                                     } else {
                                         tracing::error!(
                                             ?why,
-                                            "failed to connect to cosmic-settings's varlink service"
+                                            "failed to connect to wmde-settings's varlink service"
                                         );
                                     }
 

@@ -21,8 +21,8 @@ use std::{collections::HashSet, time::Duration};
 use zbus::fdo;
 use zbus::message::Header;
 
-const DBUS_NAME: &str = "com.system76.CosmicStatusNotifierWatcher";
-const OBJECT_PATH: &str = "/CosmicStatusNotifierWatcher";
+const DBUS_NAME: &str = "fun.wmde.StatusNotifierWatcher";
+const OBJECT_PATH: &str = "/fun/wmde/StatusNotifierWatcher";
 const REFRESH_INTERVAL: Duration = Duration::from_secs(60);
 
 /// Run daemon
@@ -51,9 +51,9 @@ pub async fn cosmic_register(conn: &zbus::Connection) -> zbus::Result<()> {
 }
 
 #[zbus::proxy(
-    interface = "com.system76.CosmicStatusNotifierWatcher",
-    default_service = "com.system76.CosmicStatusNotifierWatcher",
-    default_path = "/CosmicStatusNotifierWatcher"
+    interface = "fun.wmde.StatusNotifierWatcher",
+    default_service = "fun.wmde.StatusNotifierWatcher",
+    default_path = "/fun/wmde/StatusNotifierWatcher"
 )]
 trait CosmicAppletStatusNotifierWatcher {
     async fn register_applet(&self) -> zbus::Result<()>;
@@ -64,7 +64,7 @@ struct CosmicAppletStatusNotifierWatcher {
     unique_names: UniqueNames,
 }
 
-#[zbus::interface(name = "com.system76.CosmicStatusNotifierWatcher")]
+#[zbus::interface(name = "fun.wmde.StatusNotifierWatcher")]
 impl CosmicAppletStatusNotifierWatcher {
     fn register_applet(&mut self, #[zbus(header)] hdr: Header<'_>) {
         if let Some(sender) = hdr.sender() {

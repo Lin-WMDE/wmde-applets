@@ -1,0 +1,4 @@
+[D-BUS Service]
+Name=fun.wmde.StatusNotifierWatcher
+Exec=@bindir@/wmde-applet-status-area --status-notifier-watcher
+SystemdService=fun.wmde.StatusNotifierWatcher.service

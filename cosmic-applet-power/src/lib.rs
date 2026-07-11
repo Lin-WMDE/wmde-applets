@@ -89,7 +89,7 @@ impl cosmic::Application for Power {
     type Executor = cosmic::SingleThreadExecutor;
     type Flags = ();
     type Message = Message;
-    const APP_ID: &'static str = "com.system76.CosmicAppletPower";
+    const APP_ID: &'static str = "fun.wmde.AppletPower";
 
     fn core(&self) -> &cosmic::app::Core {
         &self.core
@@ -144,7 +144,7 @@ impl cosmic::Application for Power {
                 }
             }
             Message::OpenSettings => {
-                let exec = "cosmic-settings".to_string();
+                let exec = "wmde-settings".to_string();
                 if let Some(tx) = self.token_tx.as_ref() {
                     let _ = tx.send(TokenRequest {
                         app_id: Self::APP_ID.to_string(),
@@ -156,20 +156,20 @@ impl cosmic::Application for Power {
             }
             Message::Action(action) => match action {
                 PowerAction::LogOut => {
-                    if let Err(err) = process::Command::new("cosmic-osd").arg("log-out").spawn() {
-                        tracing::error!("Failed to spawn cosmic-osd. {err:?}");
+                    if let Err(err) = process::Command::new("wmde-osd").arg("log-out").spawn() {
+                        tracing::error!("Failed to spawn wmde-osd. {err:?}");
                         return PowerAction::LogOut.perform();
                     }
                 }
                 PowerAction::Restart => {
-                    if let Err(err) = process::Command::new("cosmic-osd").arg("restart").spawn() {
-                        tracing::error!("Failed to spawn cosmic-osd. {err:?}");
+                    if let Err(err) = process::Command::new("wmde-osd").arg("restart").spawn() {
+                        tracing::error!("Failed to spawn wmde-osd. {err:?}");
                         return PowerAction::Restart.perform();
                     }
                 }
                 PowerAction::Shutdown => {
-                    if let Err(err) = process::Command::new("cosmic-osd").arg("shutdown").spawn() {
-                        tracing::error!("Failed to spawn cosmic-osd. {err:?}");
+                    if let Err(err) = process::Command::new("wmde-osd").arg("shutdown").spawn() {
+                        tracing::error!("Failed to spawn wmde-osd. {err:?}");
                         return PowerAction::Shutdown.perform();
                     }
                 }
@@ -193,7 +193,7 @@ impl cosmic::Application for Power {
                     self.token_tx = None;
                 }
                 TokenUpdate::ActivationToken { token, .. } => {
-                    let mut cmd = std::process::Command::new("cosmic-settings");
+                    let mut cmd = std::process::Command::new("wmde-settings");
                     if let Some(token) = token {
                         cmd.env("XDG_ACTIVATION_TOKEN", &token);
                         cmd.env("DESKTOP_STARTUP_ID", &token);

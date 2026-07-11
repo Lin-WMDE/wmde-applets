@@ -2,11 +2,11 @@
 Name=Notifications Center
 Comment=Manage notifications and Do Not Disturb
 Type=Application
-Exec=cosmic-applet-notifications
+Exec=wmde-applet-notifications
 Terminal=false
 Categories=COSMIC;
 Keywords=COSMIC;Applet;Notification;
-Icon=com.system76.CosmicAppletNotifications-symbolic
+Icon=fun.wmde.AppletNotifications-symbolic
 NoDisplay=true
 X-CosmicApplet=true
 X-CosmicShrinkable=true

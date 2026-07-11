@@ -2,11 +2,11 @@
 Name=Numbered Workspaces
 Comment=Switch between numbered workspaces in the panel
 Type=Application
-Exec=cosmic-applet-workspaces
+Exec=wmde-applet-workspaces
 Terminal=false
 Categories=COSMIC;
 Keywords=COSMIC;Applet;Workspace;
-Icon=com.system76.CosmicAppletWorkspaces
+Icon=fun.wmde.AppletWorkspaces
 StartupNotify=true
 NoDisplay=true
 X-CosmicApplet=true

@@ -2,11 +2,11 @@
 Name=User Session
 Comment=Lock screen, log out, suspend, reboot, and shutdown
 Type=Application
-Exec=cosmic-applet-power
+Exec=wmde-applet-power
 Terminal=false
 Categories=COSMIC;
 Keywords=COSMIC;Applet;User;Session;Lock;Log;Reboot;Shutdown;Suspend;
-Icon=com.system76.CosmicAppletPower-symbolic
+Icon=fun.wmde.AppletPower-symbolic
 StartupNotify=true
 NoDisplay=true
 X-CosmicApplet=true

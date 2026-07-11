@@ -130,7 +130,7 @@ impl CosmicBatteryApplet {
         };
         let charging = if on_battery { "" } else { "charging-" };
         self.icon_name =
-            format!("cosmic-applet-battery-level-{battery_percent}-{limited}{charging}symbolic",);
+            format!("wmde-applet-battery-level-{battery_percent}-{limited}{charging}symbolic",);
     }
 
     fn screen_brightness_percent(&self) -> Option<f64> {
@@ -162,7 +162,7 @@ impl CosmicBatteryApplet {
         };
 
         self.display_icon_name =
-            format!("cosmic-applet-battery-display-brightness-{screen_brightness}-symbolic",);
+            format!("wmde-applet-battery-display-brightness-{screen_brightness}-symbolic",);
     }
 
     fn set_charging_limit(&mut self, limit: bool) {
@@ -265,7 +265,7 @@ impl cosmic::Application for CosmicBatteryApplet {
                     return cosmic::task::message(Message::SetKbdBrightnessDebounced);
                 }
             }
-            // Matching brightness calculation logic from cosmic-osd and cosmic-settings-daemon
+            // Matching brightness calculation logic from wmde-osd and wmde-settings-daemon
             Message::SetScreenBrightness(brightness) => {
                 let snapped = if let Some(max) = self.max_screen_brightness {
                     if max > 0 && max <= 20 {
@@ -456,7 +456,7 @@ impl cosmic::Application for CosmicBatteryApplet {
                 self.config = config;
             }
             Message::OpenSettings => {
-                let exec = "cosmic-settings power".to_string();
+                let exec = "wmde-settings power".to_string();
                 if let Some(tx) = self.token_tx.as_ref() {
                     let _ = tx.send(TokenRequest {
                         app_id: Self::APP_ID.to_string(),
@@ -474,7 +474,7 @@ impl cosmic::Application for CosmicBatteryApplet {
                     self.token_tx = None;
                 }
                 TokenUpdate::ActivationToken { token, .. } => {
-                    let mut cmd = std::process::Command::new("cosmic-settings");
+                    let mut cmd = std::process::Command::new("wmde-settings");
                     cmd.arg("power");
                     if let Some(token) = token {
                         cmd.env("XDG_ACTIVATION_TOKEN", &token);

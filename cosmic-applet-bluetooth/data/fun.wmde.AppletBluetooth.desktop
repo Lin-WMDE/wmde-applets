@@ -2,11 +2,11 @@
 Name=Bluetooth
 Comment=Manage Bluetooth devices
 Type=Application
-Exec=cosmic-applet-bluetooth
+Exec=wmde-applet-bluetooth
 Terminal=false
 Categories=COSMIC;
 Keywords=COSMIC;Applet;Bluetooth;
-Icon=com.system76.CosmicAppletBluetooth-symbolic
+Icon=fun.wmde.AppletBluetooth-symbolic
 StartupNotify=true
 NoDisplay=true
 X-CosmicApplet=true

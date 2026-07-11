@@ -7,7 +7,7 @@ fn main() -> cosmic::iced::Result {
     tracing_subscriber::fmt::init();
     let _ = tracing_log::LogTracer::init();
 
-    tracing::info!("Starting cosmic-app-list with version {VERSION}");
+    tracing::info!("Starting wmde-app-list with version {VERSION}");
 
     cosmic_app_list::run()
 }

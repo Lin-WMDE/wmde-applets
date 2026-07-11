@@ -29,9 +29,9 @@ use cosmic_protocols::workspace::v2::client::zcosmic_workspace_handle_v2::Tiling
 use std::{thread, time::Instant};
 use tracing::error;
 
-const ID: &str = "com.system76.CosmicAppletTiling";
-const ON: &str = "com.system76.CosmicAppletTiling.On";
-const OFF: &str = "com.system76.CosmicAppletTiling.Off";
+const ID: &str = "fun.wmde.AppletTiling";
+const ON: &str = "fun.wmde.AppletTiling.On";
+const OFF: &str = "fun.wmde.AppletTiling.Off";
 
 pub struct Window {
     core: Core,
@@ -74,7 +74,7 @@ impl cosmic::Application for Window {
 
     fn init(core: Core, _flags: Self::Flags) -> (Self, app::Task<Self::Message>) {
         let config_helper =
-            Config::new("com.system76.CosmicComp", CosmicCompConfig::VERSION).unwrap();
+            Config::new("fun.wmde.Comp", CosmicCompConfig::VERSION).unwrap();
         let mut config = CosmicCompConfig::get_entry(&config_helper).unwrap_or_else(|(errs, c)| {
             for err in errs {
                 error!(?err, "Error loading config");
@@ -122,7 +122,7 @@ impl cosmic::Application for Window {
     fn subscription(&self) -> Subscription<Self::Message> {
         Subscription::batch([
             self.core
-                .watch_config::<CosmicCompConfig>("com.system76.CosmicComp")
+                .watch_config::<CosmicCompConfig>("fun.wmde.Comp")
                 .map(|u| Message::MyConfigUpdate(Box::new(u.config))),
             wayland_subscription::workspaces().map(Message::WorkspaceUpdate),
         ])
@@ -229,7 +229,7 @@ impl cosmic::Application for Window {
                 });
             }
             Message::OpenSettings => {
-                let mut cmd = std::process::Command::new("cosmic-settings");
+                let mut cmd = std::process::Command::new("wmde-settings");
                 cmd.arg("window-management");
                 tokio::spawn(cosmic::process::spawn(cmd));
             }

@@ -13,9 +13,9 @@ iconsdir := sharedir + '/icons/hicolor'
 prefixdir := prefix + '/bin'
 bindir := rootdir + prefixdir
 libdir := rootdir + prefix + '/lib'
-default-schema-target := sharedir / 'cosmic'
-cosmic-applets-bin := prefixdir / 'cosmic-applets'
-metainfo := 'com.system76.CosmicApplets.metainfo.xml'
+default-schema-target := sharedir / 'wmde'
+cosmic-applets-bin := prefixdir / 'wmde-applets'
+metainfo := 'fun.wmde.Applets.metainfo.xml'
 metainfo-src := 'data' / metainfo
 metainfo-dst := clean(rootdir / prefix) / 'share' / 'metainfo' / metainfo
 
@@ -46,24 +46,27 @@ _install_desktop path:
 _install_bin name:
     install -Dm0755 {{ targetdir }}/{{ target }}/{{ name }} {{ bindir }}/{{ name }}
 
-_install_applet id name: (_install_icons name) (_install_desktop 'target/xdgen/' + id + '.desktop') (_link_applet name)
+# `dir` is the source crate directory (upstream cosmic-* name, not renamed);
+# `link` is the installed symlink/argv0 name (wmde-*). They intentionally diverge:
+# only the ROOT binary is renamed to wmde-applets, member crate dirs keep upstream names.
+_install_applet id dir link: (_install_icons dir) (_install_desktop 'target/xdgen/' + id + '.desktop') (_link_applet link)
 
-_install_button id name: (_install_icons name) (_install_desktop 'target/xdgen/' + id + '.desktop')
+_install_button id dir: (_install_icons dir) (_install_desktop 'target/xdgen/' + id + '.desktop')
 
 _install_metainfo:
     install -Dm0644 {{ metainfo-src }} {{ metainfo-dst }}
 
 _install_status_notifier_watcher:
-    sed "s|@bindir@|{{ prefixdir }}|" cosmic-applet-status-area/data/dbus-1/com.system76.CosmicStatusNotifierWatcher.service.in > cosmic-applet-status-area/data/dbus-1/com.system76.CosmicStatusNotifierWatcher.service
-    install -Dm0644 cosmic-applet-status-area/data/dbus-1/com.system76.CosmicStatusNotifierWatcher.service {{ sharedir }}/dbus-1/services/com.system76.CosmicStatusNotifierWatcher.service
-    sed "s|@bindir@|{{ prefixdir }}|" cosmic-applet-status-area/data/com.system76.CosmicStatusNotifierWatcher.service.in > cosmic-applet-status-area/data/com.system76.CosmicStatusNotifierWatcher.service
-    install -Dm0644 cosmic-applet-status-area/data/com.system76.CosmicStatusNotifierWatcher.service {{ libdir }}/systemd/user/com.system76.CosmicStatusNotifierWatcher.service
+    sed "s|@bindir@|{{ prefixdir }}|" cosmic-applet-status-area/data/dbus-1/fun.wmde.StatusNotifierWatcher.service.in > cosmic-applet-status-area/data/dbus-1/fun.wmde.StatusNotifierWatcher.service
+    install -Dm0644 cosmic-applet-status-area/data/dbus-1/fun.wmde.StatusNotifierWatcher.service {{ sharedir }}/dbus-1/services/fun.wmde.StatusNotifierWatcher.service
+    sed "s|@bindir@|{{ prefixdir }}|" cosmic-applet-status-area/data/fun.wmde.StatusNotifierWatcher.service.in > cosmic-applet-status-area/data/fun.wmde.StatusNotifierWatcher.service
+    install -Dm0644 cosmic-applet-status-area/data/fun.wmde.StatusNotifierWatcher.service {{ libdir }}/systemd/user/fun.wmde.StatusNotifierWatcher.service
 
 _install_secret_agent_policy:
-    install -Dm0644 cosmic-applet-network/data/dbus-1/system.d/com.system76.CosmicSettings.Applet.NetworkManager.SecretAgent.conf {{ sharedir }}/dbus-1/system.d/com.system76.CosmicSettings.Applet.NetworkManager.SecretAgent.conf
+    install -Dm0644 cosmic-applet-network/data/dbus-1/system.d/fun.wmde.Settings.Applet.NetworkManager.SecretAgent.conf {{ sharedir }}/dbus-1/system.d/fun.wmde.Settings.Applet.NetworkManager.SecretAgent.conf
 
 # Installs files into the system
-install: (_install_bin 'cosmic-applets') (_link_applet 'cosmic-panel-button') (_install_applet 'com.system76.CosmicAppList' 'cosmic-app-list') (_install_default_schema 'cosmic-app-list') (_install_applet 'com.system76.CosmicAppletA11y' 'cosmic-applet-a11y') (_install_applet 'com.system76.CosmicAppletAudio' 'cosmic-applet-audio') (_install_applet 'com.system76.CosmicAppletInputSources' 'cosmic-applet-input-sources') (_install_applet 'com.system76.CosmicAppletBattery' 'cosmic-applet-battery') (_install_applet 'com.system76.CosmicAppletBluetooth' 'cosmic-applet-bluetooth') (_install_applet 'com.system76.CosmicAppletMinimize' 'cosmic-applet-minimize') (_install_applet 'com.system76.CosmicAppletNetwork' 'cosmic-applet-network') (_install_applet 'com.system76.CosmicAppletNotifications' 'cosmic-applet-notifications') (_install_applet 'com.system76.CosmicAppletPower' 'cosmic-applet-power') (_install_applet 'com.system76.CosmicAppletStatusArea' 'cosmic-applet-status-area') (_install_applet 'com.system76.CosmicAppletTiling' 'cosmic-applet-tiling') (_install_applet 'com.system76.CosmicAppletTime' 'cosmic-applet-time') (_install_applet 'com.system76.CosmicAppletWorkspaces' 'cosmic-applet-workspaces') (_install_button 'com.system76.CosmicPanelAppButton' 'cosmic-panel-app-button') (_install_button 'com.system76.CosmicPanelLauncherButton' 'cosmic-panel-launcher-button') (_install_button 'com.system76.CosmicPanelWorkspacesButton' 'cosmic-panel-workspaces-button') _install_metainfo _install_status_notifier_watcher _install_secret_agent_policy
+install: (_install_bin 'wmde-applets') (_link_applet 'wmde-panel-button') (_install_applet 'fun.wmde.AppList' 'cosmic-app-list' 'wmde-app-list') (_install_default_schema 'cosmic-app-list') (_install_applet 'fun.wmde.AppletA11y' 'cosmic-applet-a11y' 'wmde-applet-a11y') (_install_applet 'fun.wmde.AppletAudio' 'cosmic-applet-audio' 'wmde-applet-audio') (_install_applet 'fun.wmde.AppletInputSources' 'cosmic-applet-input-sources' 'wmde-applet-input-sources') (_install_applet 'fun.wmde.AppletBattery' 'cosmic-applet-battery' 'wmde-applet-battery') (_install_applet 'fun.wmde.AppletBluetooth' 'cosmic-applet-bluetooth' 'wmde-applet-bluetooth') (_install_applet 'fun.wmde.AppletMinimize' 'cosmic-applet-minimize' 'wmde-applet-minimize') (_install_applet 'fun.wmde.AppletNetwork' 'cosmic-applet-network' 'wmde-applet-network') (_install_applet 'fun.wmde.AppletNotifications' 'cosmic-applet-notifications' 'wmde-applet-notifications') (_install_applet 'fun.wmde.AppletPower' 'cosmic-applet-power' 'wmde-applet-power') (_install_applet 'fun.wmde.AppletStatusArea' 'cosmic-applet-status-area' 'wmde-applet-status-area') (_install_applet 'fun.wmde.AppletTiling' 'cosmic-applet-tiling' 'wmde-applet-tiling') (_install_applet 'fun.wmde.AppletTime' 'cosmic-applet-time' 'wmde-applet-time') (_install_applet 'fun.wmde.AppletWorkspaces' 'cosmic-applet-workspaces' 'wmde-applet-workspaces') (_install_button 'fun.wmde.PanelAppButton' 'cosmic-panel-app-button') (_install_button 'fun.wmde.PanelLauncherButton' 'cosmic-panel-launcher-button') (_install_button 'fun.wmde.PanelWorkspacesButton' 'cosmic-panel-workspaces-button') _install_metainfo _install_status_notifier_watcher _install_secret_agent_policy
 
 # Vendor Cargo dependencies locally
 vendor:

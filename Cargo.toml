@@ -70,13 +70,37 @@ lto = "thin"
 [workspace.metadata.cargo-machete]
 ignored = ["libcosmic"]
 
-# [patch."https://github.com/pop-os/libcosmic"]
-# cosmic-config = { path = "../libcosmic/cosmic-config" }
-# libcosmic = { path = "../libcosmic" }
-# iced_futures = { path = "../libcosmic/iced/futures" }
-# cosmic-config = { git = "https://github.com/pop-os/libcosmic//", branch = "theme-v2" }
-# libcosmic = { git = "https://github.com/pop-os/libcosmic//", branch = "theme-v2" }
-# iced_futures = { git = "https://github.com/pop-os/libcosmic//", branch = "theme-v2" }
+# Redirect the upstream libcosmic (and every crate it vendors: cosmic-config,
+# cosmic-theme, and all the iced_* crates) to the local WMDE forks so this component
+# links against the renamed fun.wmde.* config/theme ids, not upstream System76.
+# Crate names are kept upstream on purpose, so the patch keys match.
+[patch."https://github.com/pop-os/libcosmic"]
+libcosmic = { path = "../libcosmic" }
+cosmic-config = { path = "../libcosmic/cosmic-config" }
+cosmic-config-derive = { path = "../libcosmic/cosmic-config-derive" }
+cosmic-theme = { path = "../libcosmic/cosmic-theme" }
+iced = { path = "../libcosmic/iced" }
+iced_accessibility = { path = "../libcosmic/iced/accessibility" }
+iced_core = { path = "../libcosmic/iced/core" }
+iced_debug = { path = "../libcosmic/iced/debug" }
+iced_futures = { path = "../libcosmic/iced/futures" }
+iced_graphics = { path = "../libcosmic/iced/graphics" }
+iced_program = { path = "../libcosmic/iced/program" }
+iced_renderer = { path = "../libcosmic/iced/renderer" }
+iced_runtime = { path = "../libcosmic/iced/runtime" }
+iced_tiny_skia = { path = "../libcosmic/iced/tiny_skia" }
+iced_wgpu = { path = "../libcosmic/iced/wgpu" }
+iced_widget = { path = "../libcosmic/iced/widget" }
+iced_winit = { path = "../libcosmic/iced/winit" }
+
+# Shared config crates read cross-component ids as exported consts (A.6). Point them
+# at the WMDE sibling forks so the applets resolve the renamed fun.wmde.Comp id and
+# the fun.wmde.Settings.Audio varlink socket, not the upstream System76 values.
+[patch."https://github.com/pop-os/cosmic-comp"]
+cosmic-comp-config = { path = "../wmde-comp/cosmic-comp-config" }
+
+[patch."https://github.com/pop-os/cosmic-settings-daemon"]
+cosmic-settings-audio-client = { path = "../wmde-settings-daemon/audio-client" }
 
 [patch."https://github.com/smithay/client-toolkit.git"]
 sctk = { package = "smithay-client-toolkit", version = "0.20.0" }

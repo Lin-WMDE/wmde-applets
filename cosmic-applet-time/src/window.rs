@@ -318,7 +318,7 @@ impl cosmic::Application for Window {
     type Message = Message;
     type Executor = cosmic::SingleThreadExecutor;
     type Flags = ();
-    const APP_ID: &str = "com.system76.CosmicAppletTime";
+    const APP_ID: &str = "fun.wmde.AppletTime";
 
     fn init(core: app::Core, _flags: Self::Flags) -> (Self, app::Task<Self::Message>) {
         let locale = get_system_locale();
@@ -605,7 +605,7 @@ impl cosmic::Application for Window {
                 Task::none()
             }
             Message::OpenDateTimeSettings => {
-                let exec = "cosmic-settings time".to_string();
+                let exec = "wmde-settings time".to_string();
                 if let Some(tx) = self.token_tx.as_ref() {
                     let _ = tx.send(TokenRequest {
                         app_id: Self::APP_ID.to_string(),
@@ -625,7 +625,7 @@ impl cosmic::Application for Window {
                         self.token_tx = None;
                     }
                     TokenUpdate::ActivationToken { token, .. } => {
-                        let mut cmd = std::process::Command::new("cosmic-settings");
+                        let mut cmd = std::process::Command::new("wmde-settings");
                         cmd.arg("time");
                         if let Some(token) = token {
                             cmd.env("XDG_ACTIVATION_TOKEN", &token);

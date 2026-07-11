@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>fun.wmde.Applets</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-only</project_license>
+  <project_group>WMDE</project_group>
+  <developer_name>System76</developer_name>
+  <update_contact>ashley@system76.com</update_contact>
+  <url type="homepage">https://github.com/Lin-WMDE/wmde-applets</url>
+  <url type="bugtracker">https://github.com/Lin-WMDE/wmde-applets</url>
+  <name>WMDE Applets</name>
+  <name xml:lang="ar">بريمجات WMDE</name>
+  <name xml:lang="bg">Графични обекти за WMDE</name>
+  <name xml:lang="cs">Applety WMDE</name>
+  <name xml:lang="pl">Aplety WMDE</name>
+  <name xml:lang="pt_BR">Miniaplicativos</name>
+  <name xml:lang="pt">Miniaplicativos</name>
+  <name xml:lang="hu">WMDE Kisalkalmazások</name>
+  <name xml:lang="sk">Aplety WMDE</name>
+  <name xml:lang="es">Applets WMDE</name>
+  <name xml:lang="sv">WMDE Miniprogram</name>
+  <summary>Applets for the WMDE panel</summary>
+  <summary xml:lang="ar">بريمجات للوحة WMDE</summary>
+  <summary xml:lang="bg">Графични обекти за панела на WMDE</summary>
+  <summary xml:lang="cs">Applety pro panel WMDE</summary>
+  <summary xml:lang="pl">Aplety dla panelu WMDE</summary>
+  <summary xml:lang="pt_BR">Miniaplicativos para o painel do WMDE</summary>
+  <summary xml:lang="pt">Miniaplicativos para o painel do WMDE</summary>
+  <summary xml:lang="hu">Kisalkalmazások a WMDE panelhez</summary>
+  <summary xml:lang="nl">Applets voor het paneel van WMDE</summary>
+  <summary xml:lang="de">Applets für das WMDE-Panel</summary>
+  <summary xml:lang="sk">Aplety pre panel WMDE</summary>
+  <summary xml:lang="es">Applets para el panel de WMDE</summary>
+  <summary xml:lang="sv">Miniprogram för WMDE-panelen</summary>
+  <description>
+    <p>Applets for the WMDE panel</p>
+    <p xml:lang="ar">بريمجات للوحة WMDE</p>
+    <p xml:lang="bg">Графични обекти за панела на WMDE</p>
+    <p xml:lang="cs">Applety pro panel WMDE</p>
+    <p xml:lang="pl">Aplety dla panelu WMDE</p>
+    <p xml:lang="pt_BR">Miniaplicativos para o painel do WMDE</p>
+    <p xml:lang="pt">Miniaplicativos para o painel do WMDE</p>
+    <p xml:lang="hu">Kisalkalmazások a WMDE panelhez</p>
+    <p xml:lang="nl">Applets voor het paneel van WMDE</p>
+    <p xml:lang="de">Applets für das WMDE-Panel</p>
+    <p xml:lang="sk">Aplety pre panel WMDE</p>
+    <p xml:lang="es">Applets para el panel de WMDE</p>
+    <p xml:lang="sv">Miniprogram för WMDE-panelen</p>
+  </description>
+  <launchable type="desktop-id">fun.wmde.AppList.desktop</launchable>
+  <launchable type="desktop-id">fun.wmde.AppletAudio.desktop</launchable>
+  <launchable type="desktop-id">fun.wmde.AppletBattery.desktop</launchable>
+  <launchable type="desktop-id">fun.wmde.AppletBluetooth.desktop</launchable>
+  <launchable type="desktop-id">fun.wmde.AppletInputSources.desktop</launchable>
+  <launchable type="desktop-id">fun.wmde.AppletMinimize.desktop</launchable>
+  <launchable type="desktop-id">fun.wmde.AppletNetwork.desktop</launchable>
+  <launchable type="desktop-id">fun.wmde.AppletNotifications.desktop</launchable>
+  <launchable type="desktop-id">fun.wmde.AppletPower.desktop</launchable>
+  <launchable type="desktop-id">fun.wmde.AppletStatusArea.desktop</launchable>
+  <launchable type="desktop-id">fun.wmde.AppletTiling.desktop</launchable>
+  <launchable type="desktop-id">fun.wmde.AppletTime.desktop</launchable>
+  <launchable type="desktop-id">fun.wmde.AppletWorkspaces.desktop</launchable>
+  <launchable type="desktop-id">fun.wmde.PanelAppButton.desktop</launchable>
+  <launchable type="desktop-id">fun.wmde.PanelWorkspacesButton.desktop</launchable>
+  <launchable type="desktop-id">fun.wmde.PanelLauncherButton.desktop</launchable>
+  <icon type="remote" width="256" height="256">
+    https://raw.githubusercontent.com/Lin-WMDE/wmde-applets/wmde/cosmic-app-list/data/icons/scalable/apps/fun.wmde.AppList.svg</icon>
+  <screenshots>
+  </screenshots>
+  <provides>
+    <id>fun.wmde.Applet</id>
+    <mimetypes>
+      <mimetype>text/plain</mimetype>
+    </mimetypes>
+    <binaries>
+      <binary>wmde-app-list</binary>
+      <binary>wmde-applet-audio</binary>
+      <binary>wmde-applet-battery</binary>
+      <binary>wmde-applet-bluetooth</binary>
+      <binary>wmde-panel-button</binary>
+      <binary>wmde-applet-input-sources</binary>
+      <binary>wmde-applet-minimize</binary>
+      <binary>wmde-applet-network</binary>
+      <binary>wmde-applet-notifications</binary>
+      <binary>wmde-applet-power</binary>
+      <binary>wmde-applet-status-area</binary>
+      <binary>wmde-applet-tiling</binary>
+      <binary>wmde-applet-time</binary>
+      <binary>wmde-applet-workspaces</binary>
+    </binaries>
+  </provides>
+</component>

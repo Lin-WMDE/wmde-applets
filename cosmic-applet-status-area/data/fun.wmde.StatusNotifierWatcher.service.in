@@ -1,0 +1,7 @@
+[Unit]
+Description=WMDE Status Notifier Watcher backend
+
+[Service]
+Type=dbus
+BusName=fun.wmde.StatusNotifierWatcher
+ExecStart=@bindir@/wmde-applet-status-area --status-notifier-watcher
