@@ -8,7 +8,7 @@
 # NO compat symlinks into cosmic-* binary names.
 pkgname=wmde-applets
 pkgver=1.0.15
-pkgrel=1
+pkgrel=2
 pkgdesc="WMDE panel applets (fork of cosmic-applets) - fun.wmde.Applet* config namespace"
 arch=('x86_64')
 url="https://wmde.fun"
