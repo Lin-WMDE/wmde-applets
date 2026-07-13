@@ -47,7 +47,7 @@ struct Notifications {
     dbus_sender: Option<Sender<subscriptions::dbus::Input>>,
     cards: Vec<(widget::Id, Vec<Notification>, bool, String, String, String)>,
     token_tx: Option<calloop::channel::Sender<TokenRequest>>,
-    proxy: NotificationsAppletProxy<'static>,
+    proxy: Option<NotificationsAppletProxy<'static>>,
     notifications_tx: Option<Sender<notifications::Input>>,
 }
 
@@ -114,8 +114,17 @@ impl cosmic::Application for Notifications {
             dbus_sender: Option::default(),
             cards: Vec::new(),
             token_tx: Option::default(),
-            proxy: block_on(crate::subscriptions::notifications::get_proxy())
-                .expect("Failed to get proxy"),
+            proxy: match block_on(crate::subscriptions::notifications::get_proxy()) {
+                Ok(proxy) => Some(proxy),
+                Err(err) => {
+                    // The notifications daemon socket (COSMIC_NOTIFICATIONS fd) may be
+                    // missing when the applet starts without the daemon. Degrade
+                    // gracefully instead of panicking: the icon and toggle still work,
+                    // we just won't receive the notification stream.
+                    tracing::error!("Failed to get notifications proxy: {:?}", err);
+                    None
+                }
+            },
             notifications_tx: None,
         };
         _self.update_icon();
@@ -135,7 +144,7 @@ impl cosmic::Application for Notifications {
     }
 
     fn subscription(&self) -> Subscription<Message> {
-        Subscription::batch([
+        let mut subs = vec![
             self.core
                 .watch_config(cosmic_notifications_config::ID)
                 .map(|res| {
@@ -145,10 +154,16 @@ impl cosmic::Application for Notifications {
                     Message::Config(res.config)
                 }),
             subscriptions::dbus::proxy().map(Message::DbusEvent),
-            subscriptions::notifications::notifications(self.proxy.clone())
-                .map(Message::NotificationEvent),
             activation_token_subscription(0).map(Message::Token),
-        ])
+        ];
+        // Only stream notifications if we managed to connect to the daemon proxy.
+        if let Some(proxy) = self.proxy.as_ref() {
+            subs.push(
+                subscriptions::notifications::notifications(proxy.clone())
+                    .map(Message::NotificationEvent),
+            );
+        }
+        Subscription::batch(subs)
     }
 
     fn update(&mut self, message: Self::Message) -> app::Task<Self::Message> {
