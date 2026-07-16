@@ -58,7 +58,7 @@ pub fn spawn_workspaces(tx: mpsc::Sender<TilingState>) -> SyncSender<AppRequest>
 
     if let Ok(conn) = conn {
         std::thread::spawn(move || {
-            let configured_output = std::env::var("COSMIC_PANEL_OUTPUT")
+            let configured_output = std::env::var("WMDE_PANEL_OUTPUT")
                 .ok()
                 .unwrap_or_default();
             let mut event_loop = calloop::EventLoop::<State>::try_new().unwrap();

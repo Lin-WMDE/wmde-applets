@@ -101,6 +101,21 @@ cosmic-comp-config = { path = "../wmde-comp/cosmic-comp-config" }
 [patch."https://github.com/pop-os/cosmic-settings-daemon"]
 cosmic-settings-audio-client = { path = "../wmde-settings-daemon/audio-client" }
 
+# Notifications applet DND/config must reach the wmde-notifications daemon
+# (fun.wmde.Notifications), not the upstream com.system76.CosmicNotifications id.
+[patch."https://github.com/pop-os/cosmic-notifications"]
+cosmic-notifications-config = { path = "../wmde-notifications/cosmic-notifications-config" }
+cosmic-notifications-util = { path = "../wmde-notifications/cosmic-notifications-util" }
+
+# Settings-daemon subscriptions (battery brightness, a11y) must talk to
+# fun.wmde.SettingsDaemon; the WMDE settings fork rebranded these subscription crates.
+[patch."https://github.com/pop-os/cosmic-settings"]
+cosmic-settings-daemon-subscription = { path = "../wmde-settings/subscriptions/settings-daemon" }
+cosmic-settings-upower-subscription = { path = "../wmde-settings/subscriptions/upower" }
+cosmic-settings-a11y-manager-subscription = { path = "../wmde-settings/subscriptions/a11y-manager" }
+cosmic-settings-accessibility-subscription = { path = "../wmde-settings/subscriptions/accessibility" }
+cosmic-settings-network-manager-subscription = { path = "../wmde-settings/subscriptions/network-manager" }
+
 [patch."https://github.com/smithay/client-toolkit.git"]
 sctk = { package = "smithay-client-toolkit", version = "0.20.0" }
 

@@ -117,7 +117,7 @@ impl cosmic::Application for Notifications {
             proxy: match block_on(crate::subscriptions::notifications::get_proxy()) {
                 Ok(proxy) => Some(proxy),
                 Err(err) => {
-                    // The notifications daemon socket (COSMIC_NOTIFICATIONS fd) may be
+                    // The notifications daemon socket (WMDE_NOTIFICATIONS fd) may be
                     // missing when the applet starts without the daemon. Degrade
                     // gracefully instead of panicking: the icon and toggle still work,
                     // we just won't receive the notification stream.

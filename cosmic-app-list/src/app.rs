@@ -2036,7 +2036,7 @@ impl cosmic::Application for CosmicAppList {
             vec![active]
         } else {
             vec![
-                icon::from_name("fun.wmde.AppList")
+                icon::from_name(APP_ID)
                     .size(self.core.applet.suggested_size(false).0)
                     .into(),
             ]

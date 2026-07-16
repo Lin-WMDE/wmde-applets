@@ -154,7 +154,7 @@ pub trait NotificationsApplet {
 }
 
 pub async fn get_proxy() -> anyhow::Result<NotificationsAppletProxy<'static>> {
-    let raw_fd = std::env::var("COSMIC_NOTIFICATIONS")?;
+    let raw_fd = std::env::var("WMDE_NOTIFICATIONS")?;
     let raw_fd = raw_fd.parse::<RawFd>()?;
     tracing::info!("Connecting to notifications daemon on fd {}", raw_fd);
 

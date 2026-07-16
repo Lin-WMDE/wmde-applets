@@ -30,6 +30,9 @@ use cosmic_comp_config::CosmicCompConfig;
 use std::sync::LazyLock;
 use xkb_data::KeyboardLayout;
 
+/// Compositor config id (single source of truth for this applet).
+const COMP_CONFIG_ID: &str = "fun.wmde.Comp";
+
 static AUTOSIZE_MAIN_ID: LazyLock<widget::Id> = LazyLock::new(|| widget::Id::new("autosize-main"));
 pub const ID: &str = "fun.wmde.AppletInputSources";
 
@@ -45,7 +48,7 @@ pub fn run() -> cosmic::iced::Result {
     };
 
     let (comp_config_handler, comp_config) =
-        match cosmic_config::Config::new("fun.wmde.Comp", CosmicCompConfig::VERSION) {
+        match cosmic_config::Config::new(COMP_CONFIG_ID, CosmicCompConfig::VERSION) {
             Ok(config_handler) => {
                 let config = match CosmicCompConfig::get_entry(&config_handler) {
                     Ok(ok) => ok,
@@ -282,7 +285,7 @@ impl cosmic::Application for Window {
         Subscription::batch(vec![
             rectangle_tracker_subscription(0).map(|e| Message::Rectangle(e.1)),
             self.core
-                .watch_config("fun.wmde.Comp")
+                .watch_config(COMP_CONFIG_ID)
                 .map(|update| {
                     if !update.errors.is_empty() {
                         tracing::error!(
