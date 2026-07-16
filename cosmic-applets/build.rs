@@ -96,12 +96,6 @@ fn main() {
             "cosmic-panel-app-button-keywords",
         ),
         (
-            "fun.wmde.PanelLauncherButton",
-            "cosmic-panel-launcher-button",
-            "cosmic-panel-launcher-button-comment",
-            "cosmic-panel-launcher-button-keywords",
-        ),
-        (
             "fun.wmde.PanelWorkspacesButton",
             "cosmic-panel-workspaces-button",
             "cosmic-panel-workspaces-button-comment",
