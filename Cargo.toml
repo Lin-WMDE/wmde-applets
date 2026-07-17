@@ -127,3 +127,19 @@ cosmic-client-toolkit = { git = "https://github.com/pop-os/cosmic-protocols//", 
 # cosmic-dbus-networkmanager = { path = "../dbus-settings-bindings/networkmanager" }
 # upower_dbus = { path = "../dbus-settings-bindings/upower" }
 # nm-secret-agent-manager = { path = "../dbus-settings-bindings/nm-secret-agent-manager" }
+
+# WMDE: redirect standard D-Bus binding crates to the local wmde-dbus-settings-bindings
+# fork (source-purity; these bind standard freedesktop/system services, identical to pop-os).
+[patch."https://github.com/pop-os/dbus-settings-bindings"]
+cosmic-dbus-a11y = { path = "../wmde-dbus-settings-bindings/a11y" }
+cosmic-dbus-networkmanager = { path = "../wmde-dbus-settings-bindings/networkmanager" }
+mpris2-zbus = { path = "../wmde-dbus-settings-bindings/mpris2" }
+nm-secret-agent-manager = { path = "../wmde-dbus-settings-bindings/nm-secret-agent-manager" }
+switcheroo-control = { path = "../wmde-dbus-settings-bindings/switcheroo-control" }
+timedate-zbus = { path = "../wmde-dbus-settings-bindings/timedate" }
+upower_dbus = { path = "../wmde-dbus-settings-bindings/upower" }
+
+# WMDE: redirect the panel config crates to the local wmde-panel fork.
+[patch."https://github.com/pop-os/cosmic-panel"]
+cosmic-panel-config = { path = "../wmde-panel/cosmic-panel-config" }
+xdg-shell-wrapper-config = { path = "../wmde-panel/xdg-shell-wrapper-config" }
