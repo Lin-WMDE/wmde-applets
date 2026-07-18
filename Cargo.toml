@@ -114,7 +114,6 @@ cosmic-settings-daemon-subscription = { path = "../wmde-settings/subscriptions/s
 cosmic-settings-upower-subscription = { path = "../wmde-settings/subscriptions/upower" }
 cosmic-settings-a11y-manager-subscription = { path = "../wmde-settings/subscriptions/a11y-manager" }
 cosmic-settings-accessibility-subscription = { path = "../wmde-settings/subscriptions/accessibility" }
-cosmic-settings-network-manager-subscription = { path = "../wmde-settings/subscriptions/network-manager" }
 
 [patch."https://github.com/smithay/client-toolkit.git"]
 sctk = { package = "smithay-client-toolkit", version = "0.20.0" }
