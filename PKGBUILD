@@ -15,7 +15,9 @@ url="https://wmde.fun"
 license=('GPL-3.0-only')
 # Runtime: wayland client + system libs. The applets shell out to wmde-settings,
 # wmde-osd and the wmde-panel-button multiplexer at runtime (soft deps, not hard).
-depends=('glibc' 'gcc-libs' 'wayland' 'libxkbcommon' 'libpulse' 'pipewire')
+# noto-fonts: ships Noto Sans / Noto Sans Mono - the default UI font this package
+# sets via the fun.wmde.Tk default_schema (interface_font), so it must be present.
+depends=('glibc' 'gcc-libs' 'wayland' 'libxkbcommon' 'libpulse' 'pipewire' 'noto-fonts')
 makedepends=('rust' 'cargo' 'just' 'git' 'wayland' 'clang' 'lld' 'pkgconf')
 source=("$pkgname::git+https://github.com/Lin-WMDE/wmde-applets.git#branch=wmde")
 sha256sums=('SKIP')
