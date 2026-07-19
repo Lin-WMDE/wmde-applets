@@ -312,6 +312,25 @@ impl Window {
             .align_y(Alignment::Center),
         )
     }
+
+    // WMDE: Windows 10-style stacked clock - time over date (24h by default), for
+    // horizontal (top/bottom) panels.
+    fn stacked_layout(&self) -> Element<'_, Message> {
+        let time_fmt = if self.config.military_time {
+            if self.config.show_seconds { "%H:%M:%S" } else { "%H:%M" }
+        } else if self.config.show_seconds {
+            "%I:%M:%S %p"
+        } else {
+            "%I:%M %p"
+        };
+        let time_str = strtime::format(time_fmt, &self.now).unwrap_or_default();
+        let date_str = strtime::format("%d.%m.%Y", &self.now).unwrap_or_default();
+        Element::from(
+            column!(text(time_str).size(14), text(date_str).size(10))
+                .align_x(Alignment::Center)
+                .spacing(0),
+        )
+    }
 }
 
 impl cosmic::Application for Window {
@@ -687,7 +706,13 @@ impl cosmic::Application for Window {
         );
 
         let button = button::custom(if horizontal {
-            self.horizontal_layout()
+            // WMDE: Win10-style stacked time/date; fall back to the single-line
+            // layout when the user set a custom strftime format.
+            if self.config.format_strftime.is_empty() {
+                self.stacked_layout()
+            } else {
+                self.horizontal_layout()
+            }
         } else {
             self.vertical_layout()
         })
