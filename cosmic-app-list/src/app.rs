@@ -36,7 +36,6 @@ use cosmic::{
         runtime::{core::event, dnd::peek_dnd, platform_specific::wayland::CornerRadius},
         widget::{
             Column, Row, column, mouse_area, row,
-            rule::vertical as vertical_rule,
             space::{horizontal as horizontal_space, vertical as vertical_space},
             stack,
         },
@@ -1763,16 +1762,6 @@ impl cosmic::Application for CosmicAppList {
             PanelAnchor::Top | PanelAnchor::Bottom => true,
             PanelAnchor::Left | PanelAnchor::Right => false,
         };
-        let divider_padding = match self.core.applet.size {
-            Size::Hardcoded(_) => 4,
-            Size::PanelSize(ref s) => {
-                let size = s.get_applet_icon_size_with_padding(false);
-
-                let small_size_threshold = PanelSize::S.get_applet_icon_size_with_padding(false);
-
-                if size <= small_size_threshold { 4 } else { 8 }
-            }
-        };
         let (favorite_popup_cutoff, active_popup_cutoff) = self.panel_overflow_lengths();
         let mut favorite_to_remove = if let Some(cutoff) = favorite_popup_cutoff {
             if cutoff < self.pinned_list.len() {
@@ -1989,7 +1978,9 @@ impl cosmic::Application for CosmicAppList {
             favorites.truncate(max_num - active_leftover);
             active.truncate(active_leftover);
         }
-        let (w, h, favorites, active, divider) = if is_horizontal {
+        // WMDE: no divider between pinned and running apps - Win10 shows running
+        // unpinned apps flush with the pinned ones (uniform icon spacing).
+        let (w, h, favorites, active) = if is_horizontal {
             (
                 Length::Shrink,
                 Length::Shrink,
@@ -1999,10 +1990,6 @@ impl cosmic::Application for CosmicAppList {
                 )
                 .drag_id(DND_FAVORITES),
                 row(active).spacing(app_icon.icon_spacing).into(),
-                container(vertical_rule(1))
-                    .height(Length::Fill)
-                    .padding([divider_padding, 0])
-                    .into(),
             )
         } else {
             (
@@ -2014,10 +2001,6 @@ impl cosmic::Application for CosmicAppList {
                 )
                 .drag_id(DND_FAVORITES),
                 column(active).spacing(app_icon.icon_spacing).into(),
-                container(divider::horizontal::default())
-                    .width(Length::Fill)
-                    .padding([0, divider_padding])
-                    .into(),
             )
         };
 
@@ -2029,7 +2012,7 @@ impl cosmic::Application for CosmicAppList {
         let show_pinned =
             !self.pinned_list.is_empty() || self.dnd_offer.is_some() || self.is_listening_for_dnd;
         let content_list: Vec<Element<_>> = if show_pinned && !self.active_list.is_empty() {
-            vec![favorites.into(), divider, active]
+            vec![favorites.into(), active]
         } else if show_pinned {
             vec![favorites.into()]
         } else if !self.active_list.is_empty() {
@@ -2045,14 +2028,14 @@ impl cosmic::Application for CosmicAppList {
         let mut content = match &self.core.applet.anchor {
             PanelAnchor::Left | PanelAnchor::Right => container(
                 Column::with_children(content_list)
-                    .spacing(4.0)
+                    .spacing(app_icon.icon_spacing)
                     .align_x(Alignment::Center)
                     .height(h)
                     .width(w),
             ),
             PanelAnchor::Top | PanelAnchor::Bottom => container(
                 Row::with_children(content_list)
-                    .spacing(4.0)
+                    .spacing(app_icon.icon_spacing)
                     .align_y(Alignment::Center)
                     .height(h)
                     .width(w),
