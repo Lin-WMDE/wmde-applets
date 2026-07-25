@@ -89,18 +89,6 @@ fn main() {
             "cosmic-applet-workspaces-comment",
             "cosmic-applet-workspaces-keywords",
         ),
-        (
-            "fun.wmde.PanelAppButton",
-            "cosmic-panel-app-button",
-            "cosmic-panel-app-button-comment",
-            "cosmic-panel-app-button-keywords",
-        ),
-        (
-            "fun.wmde.PanelWorkspacesButton",
-            "cosmic-panel-workspaces-button",
-            "cosmic-panel-workspaces-button-comment",
-            "cosmic-panel-workspaces-button-keywords",
-        ),
     ]
     .into_iter()
     .map(|(id, name, comment, keywords)| {
