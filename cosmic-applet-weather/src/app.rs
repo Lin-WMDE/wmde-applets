@@ -28,7 +28,7 @@ use cosmic::{
         window,
     },
     surface, theme,
-    widget::{Column, autosize, button, divider, text},
+    widget::{Column, autosize, button, divider, layer_container, text},
 };
 use cosmic_applets_config::weather::{WeatherAppletConfig, WindUnit};
 use cosmic_config::CosmicConfigEntry;
@@ -473,16 +473,29 @@ impl cosmic::Application for WeatherApplet {
 
     fn view(&self) -> Element<'_, Message> {
         let horizontal = self.core.applet.is_horizontal();
-        let (icon_px, _) = self.core.applet.suggested_size(true);
+        let suggested = self.core.applet.suggested_size(true);
+        let (pad_major, pad_minor) = self.core.applet.suggested_padding(true);
+        // Same axis mapping as the text_button helper in the applet Context.
+        let (horizontal_padding, vertical_padding) = if horizontal {
+            (pad_major, pad_minor)
+        } else {
+            (pad_minor, pad_major)
+        };
 
         let glyph_char = self
             .current
             .as_ref()
             .map(|c| weather::glyph_for_code(c.weather_code))
             .unwrap_or(weather::GLYPH_CLOUD);
+        // The glyph line box is pinned to the suggested icon height: Weather
+        // Icons glyphs overhang their em box, and an unconstrained line would
+        // inflate the button - and its hover box - to the full panel height.
         let glyph = text(glyph_char.to_string())
             .font(WEATHER_FONT)
-            .size(f32::from(icon_px));
+            .size(f32::from(suggested.1))
+            .line_height(cosmic::iced::widget::text::LineHeight::Absolute(
+                f32::from(suggested.1).into(),
+            ));
 
         let temp_str = self
             .current
@@ -491,26 +504,25 @@ impl cosmic::Application for WeatherApplet {
             .unwrap_or_else(|| String::from("--\u{b0}"));
         let temp = self.core.applet.text(temp_str);
 
-        let content: Element<'_, Message> = if horizontal {
-            row![glyph, temp]
-                .spacing(4)
-                .align_y(Alignment::Center)
-                .into()
+        // Built the way Context::text_button builds its button: the content
+        // sits in a layer_container fixed to the suggested applet size, so
+        // the hover box keeps its margins from the panel edges instead of
+        // filling the panel.
+        let button = if horizontal {
+            button::custom(
+                layer_container(row![glyph, temp].spacing(4).align_y(Alignment::Center))
+                    .center_y(Length::Fixed(f32::from(suggested.1 + 2 * vertical_padding))),
+            )
+            .padding([0, horizontal_padding])
         } else {
-            column![glyph, temp]
-                .spacing(2)
-                .align_x(Alignment::Center)
-                .into()
-        };
-
-        let button = button::custom(content)
-            .padding(if horizontal {
-                [0, self.core.applet.suggested_padding(true).0]
-            } else {
-                [self.core.applet.suggested_padding(true).0, 0]
-            })
-            .on_press_down(Message::TogglePopup)
-            .class(cosmic::theme::Button::AppletIcon);
+            button::custom(
+                layer_container(column![glyph, temp].spacing(2).align_x(Alignment::Center))
+                    .center_x(Length::Fixed(f32::from(suggested.0 + 2 * horizontal_padding))),
+            )
+            .padding([vertical_padding, 0])
+        }
+        .on_press_down(Message::TogglePopup)
+        .class(cosmic::theme::Button::AppletIcon);
 
         autosize::autosize(
             Element::from(self.core.applet.applet_tooltip(
