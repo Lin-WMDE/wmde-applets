@@ -5,8 +5,8 @@
 //! The popup layout follows the Nimbus "Modern" forecast sheet: a plain
 //! five-column table (day, condition glyph, temperature range, wind,
 //! precipitation) under a header row that differs from the data only by
-//! weight and ink, a 1px rule below the header, hairlines between rows,
-//! a translucent sheet. Colors and corner radius come from the WMDE theme.
+//! weight and ink, a 1px rule below the header, hairlines between rows.
+//! Colors, fonts, spacing and corner radius all come from the WMDE theme.
 
 use crate::fl;
 use crate::weather::{self, CurrentWeather, DayForecast};
@@ -48,15 +48,14 @@ const WEATHER_FONT: cosmic::iced::Font = cosmic::iced::Font::with_name("Weather 
 /// Fixed popup width; the Nimbus sheet is 620px, compacted here because the
 /// day column carries a weekday instead of a full ISO date.
 const POPUP_WIDTH: f32 = 460.0;
-/// Column widths of the forecast table (sum + 4 gaps + side padding = popup).
+/// Column widths of the forecast table; gaps and padding are theme spacing
+/// tokens, and columns + 4 gaps + side padding must stay under the width.
 const DAY_W: f32 = 60.0;
 const COND_W: f32 = 40.0;
 const TEMP_W: f32 = 108.0;
 const WIND_W: f32 = 84.0;
 const PRECIP_W: f32 = 68.0;
-const COL_GAP: f32 = 18.0;
-/// One type size for the whole table; the header differs by weight only.
-const CELL_SIZE: f32 = 14.0;
+/// Condition glyph size in the table; the theme has no token for this.
 const GLYPH_SIZE: f32 = 20.0;
 /// The daily forecast is re-fetched when the popup opens and the cache is
 /// older than this.
@@ -230,6 +229,7 @@ impl WeatherApplet {
 
     fn table_row<'a>(
         &self,
+        gap: u16,
         day: Element<'a, Message>,
         cond: Element<'a, Message>,
         temp: Element<'a, Message>,
@@ -253,7 +253,7 @@ impl WeatherApplet {
                 .width(Length::Fixed(PRECIP_W))
                 .align_x(Horizontal::Right),
         ]
-        .spacing(COL_GAP)
+        .spacing(f32::from(gap))
         .align_y(Alignment::Center)
         .into()
     }
@@ -270,8 +270,7 @@ impl WeatherApplet {
             .into()
     }
 
-    /// The Nimbus Modern sheet as a popup wrapper: `popup_container` with
-    /// a translucent theme background and a wider fixed width (the stock
+    /// The stock `popup_container` look with a wider fixed width (the stock
     /// helper is hard-limited to 360px).
     fn modern_popup<'a>(&self, content: impl Into<Element<'a, Message>>) -> Element<'a, Message> {
         let (vertical_align, horizontal_align) = match self.core.applet.anchor {
@@ -285,11 +284,11 @@ impl WeatherApplet {
             Container::new(Container::new(content.into()).style(|theme| {
                 let cosmic = theme.cosmic();
                 let corners = cosmic.corner_radii;
-                let mut bg = cosmic.background(theme.transparent).base;
-                bg.alpha = bg.alpha.min(0.96);
                 cosmic::iced::widget::container::Style {
                     text_color: Some(cosmic.background(theme.transparent).on.into()),
-                    background: Some(Color::from(bg).into()),
+                    background: Some(
+                        Color::from(cosmic.background(theme.transparent).base).into(),
+                    ),
                     border: cosmic::iced::Border {
                         radius: corners.radius_m.into(),
                         width: 1.0,
@@ -528,41 +527,42 @@ impl cosmic::Application for WeatherApplet {
 
     fn view_window(&self, _id: window::Id) -> Element<'_, Message> {
         let Spacing {
-            space_xxs, space_s, ..
+            space_xxxs,
+            space_xxs,
+            space_s,
+            ..
         } = theme::active().cosmic().spacing;
 
         let active = theme::active();
-        let cosmic = active.cosmic();
-        let ink = Color::from(cosmic.background(active.transparent).on);
-        // Nimbus Modern ink strengths, hue taken from the theme: the header
-        // and secondary ink at ~75%, the rule at 28%, the hairlines at 10%.
+        let palette = active.cosmic();
+        let ink = Color::from(palette.background(active.transparent).on);
+        // The header keeps the Nimbus principle - same size as the data, set
+        // apart by weight and a secondary tone of the theme ink.
         let secondary = Color {
             a: 0.75 * ink.a,
             ..ink
         };
-        let rule = Color { a: 0.28, ..ink };
-        let hairline = Color { a: 0.10, ..ink };
+        // Rule and hairlines both draw with the theme divider color.
+        let line = Color::from(palette.background(active.transparent).divider);
 
         let header_cell = |label: String| -> Element<'_, Message> {
-            text(label)
-                .size(CELL_SIZE)
+            text::body(label)
                 .font(cosmic::font::semibold())
                 .class(theme::Text::Color(secondary))
                 .into()
         };
-        let cell = |value: String| -> Element<'_, Message> {
-            text(value).size(CELL_SIZE).into()
-        };
+        let cell = |value: String| -> Element<'_, Message> { text::body(value).into() };
 
         let mut rows: Vec<Element<'_, Message>> = Vec::with_capacity(16);
         rows.push(self.table_row(
+            space_s,
             header_cell(fl!("col-day")),
             header_cell(fl!("col-condition")),
             header_cell(fl!("col-temp")),
             header_cell(fl!("col-wind")),
             header_cell(fl!("col-precip")),
         ));
-        rows.push(Self::hline(rule));
+        rows.push(Self::hline(line));
 
         match self.daily.as_deref() {
             Some(days) if !days.is_empty() => {
@@ -570,12 +570,13 @@ impl cosmic::Application for WeatherApplet {
                 let weekday_fmt = DateTimeFormatter::try_new(prefs, fieldsets::E::short()).ok();
                 for (i, day) in days.iter().enumerate() {
                     if i > 0 {
-                        rows.push(Self::hline(hairline));
+                        rows.push(Self::hline(line));
                     }
                     let glyph = text(weather::glyph_for_code(day.code).to_string())
                         .font(WEATHER_FONT)
                         .size(GLYPH_SIZE);
                     rows.push(self.table_row(
+                        space_s,
                         cell(self.day_label(&day.date, weekday_fmt.as_ref())),
                         glyph.into(),
                         cell(weather::format_temp_range(
@@ -604,14 +605,14 @@ impl cosmic::Application for WeatherApplet {
             }
         }
 
-        let table = Column::with_children(rows).spacing(6).padding(
-            cosmic::iced::Padding {
-                top: 4.0,
-                right: 14.0,
-                bottom: 6.0,
-                left: 14.0,
-            },
-        );
+        let table = Column::with_children(rows)
+            .spacing(f32::from(space_xxxs))
+            .padding(cosmic::iced::Padding {
+                top: f32::from(space_xxxs),
+                right: f32::from(space_s),
+                bottom: f32::from(space_xxxs),
+                left: f32::from(space_s),
+            });
 
         let content = Column::with_capacity(3)
             .push(table)
