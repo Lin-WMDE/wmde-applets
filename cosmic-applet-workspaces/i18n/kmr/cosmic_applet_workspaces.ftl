@@ -1,1 +1,1 @@
-cosmic-applet-workspaces = Qadên xebatê yên COSMIC
+cosmic-applet-workspaces = Qadên xebatê yên WMDE

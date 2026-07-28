@@ -1,1 +1,1 @@
-cosmic-applet-workspaces = COSMIC Çalışma Alanları
+cosmic-applet-workspaces = WMDE Çalışma Alanları

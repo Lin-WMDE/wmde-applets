@@ -1,1 +1,1 @@
-cosmic-applet-workspaces = Espaços de trabalho COSMIC
+cosmic-applet-workspaces = Espaços de trabalho WMDE

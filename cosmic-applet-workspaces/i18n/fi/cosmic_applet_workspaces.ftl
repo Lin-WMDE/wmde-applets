@@ -1,1 +1,1 @@
-cosmic-applet-workspaces = COSMICin työtilat
+cosmic-applet-workspaces = WMDEin työtilat

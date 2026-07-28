@@ -1,1 +1,1 @@
-cosmic-applet-workspaces = КОСМИК радни простори
+cosmic-applet-workspaces = WMDE радни простори

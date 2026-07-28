@@ -1,1 +1,1 @@
-cosmic-applet-workspaces = COSMIC ワークスペース
+cosmic-applet-workspaces = WMDE ワークスペース
