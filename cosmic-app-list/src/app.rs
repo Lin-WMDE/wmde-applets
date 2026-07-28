@@ -246,6 +246,12 @@ impl DockItem {
                         radius: dot_border_radius.into(),
                         ..Default::default()
                     },
+                    // WMDE: the running-app indicator is 2-4px thick - the smallest mark in the
+                    // dock. Unsnapped it spreads over an extra row at partial alpha, so it looks
+                    // dim, and neighbouring icons get visibly different brightness depending on
+                    // where each lands on the fractional grid. The radius is clamped to half the
+                    // thickness, so snapping keeps the stadium shape.
+                    snap: true,
                     ..Default::default()
                 }))
             }
@@ -505,6 +511,9 @@ fn toplevel_button<'a>(
                 width: border,
                 radius: 1.0.into(),
             },
+            // WMDE: 1px frame around the window thumbnail; the padding equals the border, so a
+            // fractional outer edge also makes the frame bleed unevenly onto the screenshot.
+            snap: true,
             ..Default::default()
         }))
         .padding(border as u16)

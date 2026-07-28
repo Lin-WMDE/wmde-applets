@@ -57,6 +57,11 @@ where
                             width: border,
                             radius: 0.0.into(),
                         },
+                        // WMDE: a 1px square frame on the applet's transparent surface. Iced
+                        // only rounds a fill to the pixel grid when this is set, and the default
+                        // leaves it off, so the outline smeared over two rows at half intensity
+                        // - differently for each thumbnail, depending where it fell on the grid.
+                        snap: true,
                         ..Default::default()
                     })))
                     .padding(border as u16)
