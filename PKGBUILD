@@ -19,6 +19,10 @@ license=('GPL-3.0-only')
 # sets via the fun.wmde.Tk default_schema (interface_font), so it must be present.
 depends=('glibc' 'gcc-libs' 'wayland' 'libxkbcommon' 'libpulse' 'pipewire' 'noto-fonts')
 makedepends=('rust' 'cargo' 'just' 'git' 'wayland' 'clang' 'lld' 'pkgconf')
+# !lto: the weather applet links rustls/ring, whose C core is compiled by gcc with
+# makepkg's CFLAGS. With the default lto option gcc emits LTO bytecode objects that
+# rustc's ld.lld cannot read - every ring_core_* symbol comes out undefined.
+options=('!lto')
 source=("$pkgname::git+https://github.com/Lin-WMDE/wmde-applets.git#branch=wmde")
 sha256sums=('SKIP')
 

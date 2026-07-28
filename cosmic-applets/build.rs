@@ -84,6 +84,12 @@ fn main() {
             "cosmic-applet-time-keywords",
         ),
         (
+            "fun.wmde.AppletWeather",
+            "cosmic-applet-weather",
+            "cosmic-applet-weather-comment",
+            "cosmic-applet-weather-keywords",
+        ),
+        (
             "fun.wmde.AppletWorkspaces",
             "cosmic-applet-workspaces",
             "cosmic-applet-workspaces-comment",

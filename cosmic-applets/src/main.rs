@@ -29,6 +29,8 @@ fn main() -> cosmic::iced::Result {
         "wmde-applet-status-area" => cosmic_applet_status_area::run(),
         "wmde-applet-tiling" => cosmic_applet_tiling::run(),
         "wmde-applet-time" => cosmic_applet_time::run(),
+        "wmde-applet-weather" => cosmic_applet_weather::run(),
+        "wmde-weather-settings" => cosmic_applet_weather::run_settings(),
         "wmde-applet-workspaces" => cosmic_applet_workspaces::run(),
         "wmde-applet-input-sources" => cosmic_applet_input_sources::run(),
         "wmde-panel-button" => cosmic_panel_button::run(),

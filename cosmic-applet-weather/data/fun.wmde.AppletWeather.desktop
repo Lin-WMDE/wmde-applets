@@ -1,0 +1,14 @@
+[Desktop Entry]
+Name=Weather
+Comment=Current weather in the panel with a 7-day forecast popup
+Type=Application
+Exec=wmde-applet-weather
+Terminal=false
+Categories=WMDE;
+Keywords=WMDE;Applet;Weather;Forecast;
+Icon=fun.wmde.AppletWeather-symbolic
+StartupNotify=true
+NoDisplay=true
+X-CosmicApplet=true
+X-CosmicShrinkable=true
+X-OverflowPriority=10

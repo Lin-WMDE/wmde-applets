@@ -58,6 +58,7 @@
   <launchable type="desktop-id">fun.wmde.AppletStatusArea.desktop</launchable>
   <launchable type="desktop-id">fun.wmde.AppletTiling.desktop</launchable>
   <launchable type="desktop-id">fun.wmde.AppletTime.desktop</launchable>
+  <launchable type="desktop-id">fun.wmde.AppletWeather.desktop</launchable>
   <launchable type="desktop-id">fun.wmde.AppletWorkspaces.desktop</launchable>
   <icon type="remote" width="256" height="256">
     https://raw.githubusercontent.com/Lin-WMDE/wmde-applets/wmde/cosmic-app-list/data/icons/scalable/apps/fun.wmde.AppList.svg</icon>

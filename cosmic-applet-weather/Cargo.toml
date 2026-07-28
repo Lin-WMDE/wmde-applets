@@ -1,0 +1,20 @@
+[package]
+name = "cosmic-applet-weather"
+version = "1.0.15"
+edition = "2024"
+license = "GPL-3.0-only"
+
+[dependencies]
+cosmic-applets-config.workspace = true
+cosmic-config.workspace = true
+i18n-embed-fl.workspace = true
+i18n-embed.workspace = true
+icu = { version = "2.1.1", features = ["compiled_data"] }
+libcosmic.workspace = true
+reqwest.workspace = true
+rust-embed.workspace = true
+serde.workspace = true
+tokio.workspace = true
+tracing-log.workspace = true
+tracing-subscriber.workspace = true
+tracing.workspace = true
