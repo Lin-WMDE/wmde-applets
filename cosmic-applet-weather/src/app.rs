@@ -6,7 +6,7 @@
 //! five-column table (day, condition glyph, temperature range, wind,
 //! precipitation) under a header row that differs from the data only by
 //! weight and ink, a 1px rule below the header, hairlines between rows,
-//! a translucent sheet with 14px corners. Colors come from the WMDE theme.
+//! a translucent sheet. Colors and corner radius come from the WMDE theme.
 
 use crate::fl;
 use crate::weather::{self, CurrentWeather, DayForecast};
@@ -271,8 +271,8 @@ impl WeatherApplet {
     }
 
     /// The Nimbus Modern sheet as a popup wrapper: `popup_container` with
-    /// 14px corners, a translucent theme background and a wider fixed width
-    /// (the stock helper is hard-limited to 360px).
+    /// a translucent theme background and a wider fixed width (the stock
+    /// helper is hard-limited to 360px).
     fn modern_popup<'a>(&self, content: impl Into<Element<'a, Message>>) -> Element<'a, Message> {
         let (vertical_align, horizontal_align) = match self.core.applet.anchor {
             PanelAnchor::Left => (Vertical::Center, Horizontal::Left),
@@ -284,13 +284,14 @@ impl WeatherApplet {
         autosize::autosize(
             Container::new(Container::new(content.into()).style(|theme| {
                 let cosmic = theme.cosmic();
+                let corners = cosmic.corner_radii;
                 let mut bg = cosmic.background(theme.transparent).base;
                 bg.alpha = bg.alpha.min(0.96);
                 cosmic::iced::widget::container::Style {
                     text_color: Some(cosmic.background(theme.transparent).on.into()),
                     background: Some(Color::from(bg).into()),
                     border: cosmic::iced::Border {
-                        radius: 14.0.into(),
+                        radius: corners.radius_m.into(),
                         width: 1.0,
                         color: cosmic.background(theme.transparent).divider.into(),
                     },
