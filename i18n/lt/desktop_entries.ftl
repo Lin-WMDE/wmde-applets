@@ -39,4 +39,4 @@ cosmic-panel-workspaces-button-keywords = WMDE;Apletas;Darbo sritis;Apžvalga;
 cosmic-applet-power-comment = Užrakinti ekraną, atsijungti, užmigdyti, perkrauti ir išjungti
 cosmic-applet-power-keywords = WMDE;Apletas;Naudotojas;Sesija;Užrakinti;Perkrauti;Išjungti;Užmigdyti;
 cosmic-applet-status-area-comment = Aplikacijų indikatorius galintis eksportuoti meniu į panelę
-cosmic-applet-status-area-keywords = COSCMIC;Apletas;Aplikacija;Indikatorius;Pranešimas;Dėtuvė;Būsena;
+cosmic-applet-status-area-keywords = WMDE;Apletas;Aplikacija;Indikatorius;Pranešimas;Dėtuvė;Būsena;
