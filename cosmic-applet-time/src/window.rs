@@ -326,7 +326,7 @@ impl Window {
         let time_str = strtime::format(time_fmt, &self.now).unwrap_or_default();
         let date_str = strtime::format("%d.%m.%Y", &self.now).unwrap_or_default();
         Element::from(
-            column!(text(time_str).size(14), text(date_str).size(10))
+            column!(text(time_str).size(12), text(date_str).size(10))
                 .align_x(Alignment::Center)
                 .spacing(0),
         )

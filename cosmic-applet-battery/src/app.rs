@@ -753,7 +753,7 @@ impl cosmic::Application for CosmicBatteryApplet {
                     toggler(charging_limit)
                         .on_toggle(Message::SetChargingLimit)
                         .label(fl!("max-charge"))
-                        .text_size(14)
+                        .text_size(12)
                         .width(Length::Fill),
                 )
                 .into(),

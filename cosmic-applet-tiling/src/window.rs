@@ -265,7 +265,7 @@ impl cosmic::Application for Window {
             padded_control(container(
                 toggler(self.autotiled)
                     .on_toggle(Message::ToggleTileWindows)
-                    .text_size(14)
+                    .text_size(12)
                     .width(Length::Fill)
                     .label(fl!("tile-current"))
             )),
@@ -300,7 +300,7 @@ impl cosmic::Application for Window {
                 toggler(self.config.active_hint)
                     .on_toggle(Message::ToggleActiveHint)
                     .label(fl!("active-hint"))
-                    .text_size(14)
+                    .text_size(12)
                     .width(Length::Fill),
             ),
             padded_control(divider::horizontal::default()).padding([space_xxs, space_s]),

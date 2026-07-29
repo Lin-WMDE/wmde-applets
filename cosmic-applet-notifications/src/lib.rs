@@ -407,7 +407,7 @@ impl cosmic::Application for Notifications {
         let do_not_disturb = padded_control(row![
             toggler(self.config.do_not_disturb)
                 .on_toggle(Message::DoNotDisturb)
-                .text_size(14)
+                .text_size(12)
                 .width(Length::Fill)
                 .label(fl!("do-not-disturb"))
         ]);

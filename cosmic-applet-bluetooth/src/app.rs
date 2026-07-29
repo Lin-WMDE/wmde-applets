@@ -407,7 +407,7 @@ impl cosmic::Application for CosmicBluetoothApplet {
                 .label(fl!("bluetooth"))
                 .on_toggle(Message::ToggleBluetooth)
                 .width(Length::Fill)
-                .text_size(14)
+                .text_size(12)
         ),],]
         .align_x(Alignment::Center)
         .padding([8, 0]);
