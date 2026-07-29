@@ -312,21 +312,21 @@ impl cosmic::Application for CosmicA11yApplet {
         let reader_toggle = padded_control(
             toggler(self.reader_enabled)
                 .on_toggle(Message::ScreenReaderEnabled)
-                .text_size(14)
+                .text_size(12)
                 .width(Length::Fill)
                 .label(fl!("screen-reader")),
         );
         let magnifier_toggle = padded_control(
             toggler(self.magnifier_enabled)
                 .on_toggle(Message::MagnifierEnabled)
-                .text_size(14)
+                .text_size(12)
                 .width(Length::Fill)
                 .label(fl!("magnifier")),
         );
         let invert_colors_toggle = padded_control(
             toggler(self.inverted_colors_enabled)
                 .on_toggle(Message::InvertedColorsEnabled)
-                .text_size(14)
+                .text_size(12)
                 .width(Length::Fill)
                 .label(fl!("invert-colors")),
         );
@@ -338,7 +338,7 @@ impl cosmic::Application for CosmicA11yApplet {
             )
             .on_toggle(Message::HighContrastEnabled)
             .label(fl!("high-contrast"))
-            .text_size(14)
+            .text_size(12)
             .width(Length::Fill),
         );
 
@@ -347,7 +347,7 @@ impl cosmic::Application for CosmicA11yApplet {
                 .on_toggle(Message::FilterColorsEnabled)
                 .label(fl!("filter-colors"))
                 .width(Length::Fill)
-                .text_size(14),
+                .text_size(12),
         );
 
         let content_list = Column::with_capacity(5)

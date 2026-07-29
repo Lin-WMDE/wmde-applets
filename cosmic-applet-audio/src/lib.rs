@@ -849,7 +849,7 @@ impl cosmic::Application for Audio {
                 toggler(self.config.show_media_controls_in_top_panel)
                     .on_toggle(Message::ToggleMediaControlsInTopPanel)
                     .label(fl!("show-media-controls"))
-                    .text_size(14)
+                    .text_size(12)
                     .width(Length::Fill)
             ),
             padded_control(divider::horizontal::default()).padding([space_xxs, space_s]),

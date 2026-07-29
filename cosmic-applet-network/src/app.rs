@@ -1843,7 +1843,7 @@ impl cosmic::Application for CosmicNetworkApplet {
                     toggler(self.nm_state.nm_state.airplane_mode)
                         .label(fl!("airplane-mode"))
                         .on_toggle(Message::ToggleAirplaneMode)
-                        .text_size(14)
+                        .text_size(12)
                         .width(Length::Fill),
                 )
                 .into(),
@@ -1858,7 +1858,7 @@ impl cosmic::Application for CosmicNetworkApplet {
                     toggler(self.nm_state.nm_state.wifi_enabled)
                         .label(fl!("wifi"))
                         .on_toggle(Message::WiFiEnable)
-                        .text_size(14)
+                        .text_size(12)
                         .width(Length::Fill),
                 ))
                 .align_x(Alignment::Center);
