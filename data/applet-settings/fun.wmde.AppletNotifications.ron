@@ -1,0 +1,65 @@
+// WMDE applet settings schema. See .doc/settings/08-applet-schemas.md.
+//
+// The config written here belongs to the notification DAEMON, not to the applet: the
+// applet is a view onto it. Schemas may name another component's config, and this is why
+// the id is declared rather than assumed to be the applet's own.
+(
+    schema: 1,
+    config: (id: "fun.wmde.Notifications", version: 1),
+    groups: [
+        (
+            title: { "": "Behaviour", "uk": "Поведінка" },
+            rows: [
+                Setting(
+                    key: "do_not_disturb",
+                    label: { "": "Do not disturb", "uk": "Не турбувати" },
+                    description: {
+                        "": "Collect notifications without showing banners.",
+                        "uk": "Збирати сповіщення, не показуючи спливні вікна.",
+                    },
+                    control: Toggle,
+                    default: "false",
+                ),
+            ],
+        ),
+        (
+            title: { "": "Position", "uk": "Розташування" },
+            rows: [
+                Setting(
+                    key: "anchor",
+                    label: { "": "Banners appear", "uk": "Спливні вікна зʼявляються" },
+                    control: Choice(items: [
+                        (value: "Top",         label: { "": "Top",          "uk": "Згори" }),
+                        (value: "Bottom",      label: { "": "Bottom",       "uk": "Знизу" }),
+                        (value: "Left",        label: { "": "Left",         "uk": "Ліворуч" }),
+                        (value: "Right",       label: { "": "Right",        "uk": "Праворуч" }),
+                        (value: "TopLeft",     label: { "": "Top left",     "uk": "Згори ліворуч" }),
+                        (value: "TopRight",    label: { "": "Top right",    "uk": "Згори праворуч" }),
+                        (value: "BottomLeft",  label: { "": "Bottom left",  "uk": "Знизу ліворуч" }),
+                        (value: "BottomRight", label: { "": "Bottom right", "uk": "Знизу праворуч" }),
+                    ]),
+                    default: "Top",
+                ),
+            ],
+        ),
+        (
+            title: { "": "Stack size", "uk": "Розмір стосу" },
+            rows: [
+                Setting(
+                    key: "max_notifications",
+                    label: {
+                        "": "Show at most",
+                        "uk": "Показувати не більше",
+                    },
+                    control: Choice(style: Radio, items: [
+                        (value: "1",  label: { "": "1 notification",   "uk": "1 сповіщення" }),
+                        (value: "3",  label: { "": "3 notifications",  "uk": "3 сповіщення" }),
+                        (value: "5",  label: { "": "5 notifications",  "uk": "5 сповіщень" }),
+                        (value: "10", label: { "": "10 notifications", "uk": "10 сповіщень" }),
+                    ]),
+                    default: "3",
+                ),
+            ],
+        ),
+    ],
+)

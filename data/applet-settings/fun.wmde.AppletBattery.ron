@@ -1,0 +1,31 @@
+// WMDE applet settings schema. See .doc/settings/08-applet-schemas.md.
+//
+// The "" key of every label is the mandatory English fallback.
+(
+    schema: 1,
+    config: (id: "fun.wmde.AppletBattery", version: 1),
+    groups: [
+        (
+            title: { "": "Panel", "uk": "Панель" },
+            rows: [
+                Setting(
+                    key: "show_percentage",
+                    label: {
+                        "": "Show charge percentage",
+                        "uk": "Показувати відсоток заряду",
+                    },
+                    description: {
+                        "": "Print the number next to the battery icon.",
+                        "uk": "Виводити число поряд зі значком батареї.",
+                    },
+                    control: Toggle,
+                    default: "false",
+                ),
+                Note(text: {
+                    "": "Power profiles and screen timeouts live in Power.",
+                    "uk": "Режими живлення та час до вимкнення екрана - у розділі «Живлення».",
+                }),
+            ],
+        ),
+    ],
+)

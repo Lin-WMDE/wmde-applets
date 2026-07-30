@@ -16,6 +16,9 @@ libdir := rootdir + prefix + '/lib'
 # The dock's pinned entries and the toolkit defaults are not shipped from here: they are
 # part of the theme and live in the wmde-themes package.
 cosmic-applets-bin := prefixdir / 'wmde-applets'
+# Settings reads these to build a page per applet; the path is part of the contract with
+# third-party applets, which install their own schema into the same directory.
+applet-settings-dir := sharedir + '/wmde/applet-settings'
 metainfo := 'fun.wmde.Applets.metainfo.xml'
 metainfo-src := 'data' / metainfo
 metainfo-dst := clean(rootdir / prefix) / 'share' / 'metainfo' / metainfo
@@ -49,6 +52,9 @@ _install_bin name:
 # only the ROOT binary is renamed to wmde-applets, member crate dirs keep upstream names.
 _install_applet id dir link: (_install_icons dir) (_install_desktop 'target/xdgen/' + id + '.desktop') (_link_applet link)
 
+_install_applet_schemas:
+    install -Dm0644 -t {{ applet-settings-dir }} data/applet-settings/*.ron
+
 _install_metainfo:
     install -Dm0644 {{ metainfo-src }} {{ metainfo-dst }}
 
@@ -62,7 +68,7 @@ _install_secret_agent_policy:
     install -Dm0644 cosmic-applet-network/data/dbus-1/system.d/fun.wmde.Settings.Applet.NetworkManager.SecretAgent.conf {{ sharedir }}/dbus-1/system.d/fun.wmde.Settings.Applet.NetworkManager.SecretAgent.conf
 
 # Installs files into the system
-install: (_install_bin 'wmde-applets') (_link_applet 'wmde-panel-button') (_install_applet 'fun.wmde.AppList' 'cosmic-app-list' 'wmde-app-list') (_install_applet 'fun.wmde.AppletA11y' 'cosmic-applet-a11y' 'wmde-applet-a11y') (_install_applet 'fun.wmde.AppletAudio' 'cosmic-applet-audio' 'wmde-applet-audio') (_install_applet 'fun.wmde.AppletInputSources' 'cosmic-applet-input-sources' 'wmde-applet-input-sources') (_install_applet 'fun.wmde.AppletBattery' 'cosmic-applet-battery' 'wmde-applet-battery') (_install_applet 'fun.wmde.AppletBluetooth' 'cosmic-applet-bluetooth' 'wmde-applet-bluetooth') (_install_applet 'fun.wmde.AppletMinimize' 'cosmic-applet-minimize' 'wmde-applet-minimize') (_install_applet 'fun.wmde.AppletNetwork' 'cosmic-applet-network' 'wmde-applet-network') (_install_applet 'fun.wmde.AppletNotifications' 'cosmic-applet-notifications' 'wmde-applet-notifications') (_install_applet 'fun.wmde.AppletPower' 'cosmic-applet-power' 'wmde-applet-power') (_install_applet 'fun.wmde.AppletStatusArea' 'cosmic-applet-status-area' 'wmde-applet-status-area') (_install_applet 'fun.wmde.AppletTiling' 'cosmic-applet-tiling' 'wmde-applet-tiling') (_install_applet 'fun.wmde.AppletTime' 'cosmic-applet-time' 'wmde-applet-time') (_install_applet 'fun.wmde.AppletWeather' 'cosmic-applet-weather' 'wmde-applet-weather') (_link_applet 'wmde-weather-settings') (_install_applet 'fun.wmde.AppletWorkspaces' 'cosmic-applet-workspaces' 'wmde-applet-workspaces') _install_metainfo _install_status_notifier_watcher _install_secret_agent_policy
+install: (_install_bin 'wmde-applets') (_link_applet 'wmde-panel-button') (_install_applet 'fun.wmde.AppList' 'cosmic-app-list' 'wmde-app-list') (_install_applet 'fun.wmde.AppletA11y' 'cosmic-applet-a11y' 'wmde-applet-a11y') (_install_applet 'fun.wmde.AppletAudio' 'cosmic-applet-audio' 'wmde-applet-audio') (_install_applet 'fun.wmde.AppletInputSources' 'cosmic-applet-input-sources' 'wmde-applet-input-sources') (_install_applet 'fun.wmde.AppletBattery' 'cosmic-applet-battery' 'wmde-applet-battery') (_install_applet 'fun.wmde.AppletBluetooth' 'cosmic-applet-bluetooth' 'wmde-applet-bluetooth') (_install_applet 'fun.wmde.AppletMinimize' 'cosmic-applet-minimize' 'wmde-applet-minimize') (_install_applet 'fun.wmde.AppletNetwork' 'cosmic-applet-network' 'wmde-applet-network') (_install_applet 'fun.wmde.AppletNotifications' 'cosmic-applet-notifications' 'wmde-applet-notifications') (_install_applet 'fun.wmde.AppletPower' 'cosmic-applet-power' 'wmde-applet-power') (_install_applet 'fun.wmde.AppletStatusArea' 'cosmic-applet-status-area' 'wmde-applet-status-area') (_install_applet 'fun.wmde.AppletTiling' 'cosmic-applet-tiling' 'wmde-applet-tiling') (_install_applet 'fun.wmde.AppletTime' 'cosmic-applet-time' 'wmde-applet-time') (_install_applet 'fun.wmde.AppletWeather' 'cosmic-applet-weather' 'wmde-applet-weather') (_link_applet 'wmde-weather-settings') (_install_applet 'fun.wmde.AppletWorkspaces' 'cosmic-applet-workspaces' 'wmde-applet-workspaces') _install_applet_schemas _install_metainfo _install_status_notifier_watcher _install_secret_agent_policy
 
 # Vendor Cargo dependencies locally
 vendor:
