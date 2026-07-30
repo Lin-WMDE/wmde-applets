@@ -15,8 +15,9 @@ url="https://wmde.fun"
 license=('GPL-3.0-only')
 # Runtime: wayland client + system libs. The applets shell out to wmde-settings,
 # wmde-osd and the wmde-panel-button multiplexer at runtime (soft deps, not hard).
-# noto-fonts: ships Noto Sans / Noto Sans Mono - the default UI font this package
-# sets via the fun.wmde.Tk default_schema (interface_font), so it must be present.
+# noto-fonts: ships Noto Sans / Noto Sans Mono, the families the applets render their
+# labels in. The theme is what NAMES them (fun.wmde.Tk moved to wmde-themes, which
+# declares the same dependency); this one keeps the applets standing on their own.
 depends=('glibc' 'gcc-libs' 'wayland' 'libxkbcommon' 'libpulse' 'pipewire' 'noto-fonts')
 makedepends=('rust' 'cargo' 'just' 'git' 'wayland' 'clang' 'lld' 'pkgconf')
 # !lto: the weather applet links rustls/ring, whose C core is compiled by gcc with
@@ -49,9 +50,9 @@ package() {
   cd "$srcdir/$pkgname"
   # Installs /usr/bin/wmde-applets + wmde-applet-* symlinks, fun.wmde.*.desktop,
   # the fun.wmde.Applets metainfo, the fun.wmde.StatusNotifierWatcher D-Bus/systemd
-  # units, the fun.wmde.Settings.Applet.NetworkManager.SecretAgent policy, per-applet
-  # icons (wmde-applet-* / fun.wmde.*), and the fun.wmde.AppList default schema under
-  # /usr/share/wmde/ (config root is wmde).
+  # units, the fun.wmde.Settings.Applet.NetworkManager.SecretAgent policy and per-applet
+  # icons (wmde-applet-* / fun.wmde.*). The fun.wmde.Tk and fun.wmde.AppList defaults are
+  # NOT installed from here - they are part of the theme and ship in wmde-themes.
   just rootdir="$pkgdir" prefix=/usr install
   install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 }
