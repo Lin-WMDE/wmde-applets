@@ -47,7 +47,7 @@ impl Default for SysmonAppletConfig {
         Self {
             interval_ms: 1000,
             graph_width: 40,
-            height_percent: 95,
+            height_percent: 80,
             // The two graphs MATE also shows by default; the rest are one
             // toggle away in the settings page.
             cpu: true,

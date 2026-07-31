@@ -423,7 +423,7 @@ mod tests {
     #[test]
     fn full_height_fills_the_panel() {
         assert_eq!(graph_thickness(PANEL_S, 100), PANEL_S);
-        assert_eq!(graph_thickness(PANEL_S, 95), 38.0);
+        assert_eq!(graph_thickness(PANEL_S, 80), 32.0, "the default");
         assert_eq!(graph_thickness(PANEL_S, 50), 20.0, "the icon row height");
     }
 
