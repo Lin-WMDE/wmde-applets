@@ -37,6 +37,10 @@ const MIN_WIDTH: u32 = 10;
 const MAX_WIDTH: u32 = 200;
 const MIN_INTERVAL: u32 = 250;
 const MAX_INTERVAL: u32 = 10_000;
+const MIN_HEIGHT_PERCENT: u32 = 20;
+const MAX_HEIGHT_PERCENT: u32 = 100;
+/// Below this a graph has no room for a border and a band at once.
+const MIN_THICKNESS: f32 = 4.0;
 
 static AUTOSIZE_MAIN_ID: LazyLock<cosmic::widget::Id> =
     LazyLock::new(|| cosmic::widget::Id::new("autosize-main"));
@@ -207,6 +211,18 @@ impl SysmonApplet {
     }
 }
 
+/// Extent of the strip across the panel. 100 percent is the panel's whole
+/// thickness, padding included: at that setting a graph runs edge to edge.
+fn graph_thickness(panel_thickness: f32, percent: u32) -> f32 {
+    let percent = percent.clamp(MIN_HEIGHT_PERCENT, MAX_HEIGHT_PERCENT) as f32;
+    // Not `clamp`: on a panel thinner than the floor the bounds would cross,
+    // and `f32::clamp` panics when they do.
+    (panel_thickness * percent / 100.0)
+        .round()
+        .max(MIN_THICKNESS)
+        .min(panel_thickness)
+}
+
 const KIB: f64 = 1024.0;
 const MIB: f64 = 1024.0 * KIB;
 const GIB: f64 = 1024.0 * MIB;
@@ -306,6 +322,13 @@ impl cosmic::Application for SysmonApplet {
             (pad_minor, pad_major)
         };
         let Spacing { space_xxxs, .. } = theme::active().cosmic().spacing;
+        // The panel makes itself as thick as an applet icon plus its padding
+        // on both sides, so that sum is the panel's own thickness.
+        let panel_thickness = if horizontal {
+            f32::from(suggested.1 + 2 * vertical_padding)
+        } else {
+            f32::from(suggested.0 + 2 * horizontal_padding)
+        };
 
         let content: Element<'_, Message> = if self.kinds.is_empty() {
             // Nothing to draw, but the applet still has to be findable in the
@@ -322,22 +345,23 @@ impl cosmic::Application for SysmonApplet {
                 Metrics {
                     horizontal,
                     length: self.width() as f32,
-                    thickness: f32::from(if horizontal { suggested.1 } else { suggested.0 }),
+                    thickness: graph_thickness(panel_thickness, self.config.height_percent),
                     gap: f32::from(space_xxxs),
                 },
             )
             .into()
         };
 
+        // The strip is centered across the panel and padded only along it:
+        // at 100 percent it runs edge to edge, and the cross-axis padding is
+        // exactly what it eats.
         let framed = if horizontal {
             container(content)
-                .center_y(Length::Fixed(f32::from(suggested.1 + 2 * vertical_padding)))
+                .center_y(Length::Fixed(panel_thickness))
                 .padding([0, horizontal_padding])
         } else {
             container(content)
-                .center_x(Length::Fixed(f32::from(
-                    suggested.0 + 2 * horizontal_padding,
-                )))
+                .center_x(Length::Fixed(panel_thickness))
                 .padding([vertical_padding, 0])
         };
 
@@ -385,5 +409,29 @@ impl cosmic::Application for SysmonApplet {
 
     fn style(&self) -> Option<cosmic::iced::theme::Style> {
         Some(cosmic::applet::style())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Panel size S: a 20 pixel symbolic icon with 10 pixels of padding on
+    /// each side.
+    const PANEL_S: f32 = 40.0;
+
+    #[test]
+    fn full_height_fills_the_panel() {
+        assert_eq!(graph_thickness(PANEL_S, 100), PANEL_S);
+        assert_eq!(graph_thickness(PANEL_S, 95), 38.0);
+        assert_eq!(graph_thickness(PANEL_S, 50), 20.0, "the icon row height");
+    }
+
+    #[test]
+    fn height_stays_inside_the_panel_and_above_a_hairline() {
+        assert_eq!(graph_thickness(PANEL_S, 400), PANEL_S, "clamped to 100");
+        assert_eq!(graph_thickness(PANEL_S, 0), 8.0, "clamped to 20");
+        // A panel thinner than the floor still gets what there is, not more.
+        assert_eq!(graph_thickness(3.0, 20), 3.0);
     }
 }

@@ -83,6 +83,16 @@
                     default: "40",
                 ),
                 Setting(
+                    key: "height_percent",
+                    label: { "": "Graph height", "uk": "Висота графіка" },
+                    description: {
+                        "": "In percent of the panel thickness. At 100 the graphs run from edge to edge with no padding left over.",
+                        "uk": "У відсотках від товщини панелі. На 100 графіки йдуть від краю до краю, полів не лишається.",
+                    },
+                    control: Number(min: 20.0, max: 100.0, step: 5.0, suffix: { "": "%", "uk": "%" }),
+                    default: "95",
+                ),
+                Setting(
                     key: "interval_ms",
                     label: { "": "Update interval", "uk": "Проміжок оновлення" },
                     description: {

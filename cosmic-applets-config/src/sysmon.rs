@@ -15,6 +15,10 @@ pub struct SysmonAppletConfig {
     /// Length of one graph along the panel, in pixels. It is also the depth
     /// of the history: one sample is drawn one pixel wide.
     pub graph_width: u32,
+    /// Extent of the strip across the panel, in percent of the panel's whole
+    /// thickness. At 100 the graphs run from edge to edge with no padding
+    /// left over.
+    pub height_percent: u32,
     pub cpu: bool,
     pub memory: bool,
     pub network: bool,
@@ -43,6 +47,7 @@ impl Default for SysmonAppletConfig {
         Self {
             interval_ms: 1000,
             graph_width: 40,
+            height_percent: 95,
             // The two graphs MATE also shows by default; the rest are one
             // toggle away in the settings page.
             cpu: true,
