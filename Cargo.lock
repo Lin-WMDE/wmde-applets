@@ -1176,6 +1176,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "cosmic-applet-sysmon"
+version = "1.0.15"
+dependencies = [
+ "cosmic-applets-config",
+ "cosmic-config",
+ "i18n-embed",
+ "i18n-embed-fl",
+ "libcosmic",
+ "rust-embed",
+ "tokio",
+ "tracing",
+ "tracing-log",
+ "tracing-subscriber",
+]
+
+[[package]]
 name = "cosmic-applet-tiling"
 version = "1.0.15"
 dependencies = [
@@ -8125,6 +8141,7 @@ dependencies = [
  "cosmic-applet-notifications",
  "cosmic-applet-power",
  "cosmic-applet-status-area",
+ "cosmic-applet-sysmon",
  "cosmic-applet-tiling",
  "cosmic-applet-time",
  "cosmic-applet-weather",

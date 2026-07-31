@@ -27,6 +27,7 @@ fn main() -> cosmic::iced::Result {
         "wmde-applet-notifications" => cosmic_applet_notifications::run(),
         "wmde-applet-power" => cosmic_applet_power::run(),
         "wmde-applet-status-area" => cosmic_applet_status_area::run(),
+        "wmde-applet-sysmon" => cosmic_applet_sysmon::run(),
         "wmde-applet-tiling" => cosmic_applet_tiling::run(),
         "wmde-applet-time" => cosmic_applet_time::run(),
         "wmde-applet-weather" => cosmic_applet_weather::run(),

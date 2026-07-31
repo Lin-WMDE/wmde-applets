@@ -12,6 +12,7 @@ members = [
     "cosmic-applet-notifications",
     "cosmic-applet-power",
     "cosmic-applet-status-area",
+    "cosmic-applet-sysmon",
     "cosmic-applet-tiling",
     "cosmic-applet-time",
     "cosmic-applet-weather",

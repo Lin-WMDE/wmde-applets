@@ -1,0 +1,197 @@
+// WMDE applet settings schema. See .doc/settings/08-applet-schemas.md.
+//
+// Every stored key is here. Colors are hex text rather than a picker: the schema
+// vocabulary has no color control, and adding one would mean changing the schema
+// language and wmde-settings, not this applet. An empty field means the band takes
+// its color from the theme, which is what every color key ships as.
+(
+    schema: 1,
+    config: (id: "fun.wmde.AppletSysmon", version: 1),
+    groups: [
+        (
+            title: { "": "Graphs", "uk": "Графіки" },
+            rows: [
+                Setting(
+                    key: "cpu",
+                    label: { "": "Processor", "uk": "Процесор" },
+                    description: {
+                        "": "User, nice, system and iowait time, stacked to 100%.",
+                        "uk": "Час користувача, зниженого пріоритету, системи та очікування вводу-виводу, складені до 100%.",
+                    },
+                    control: Toggle,
+                    default: "true",
+                ),
+                Setting(
+                    key: "memory",
+                    label: { "": "Memory", "uk": "Памʼять" },
+                    description: {
+                        "": "Used, buffers and cache, against total memory.",
+                        "uk": "Зайнято, буфери та кеш, відносно всієї памʼяті.",
+                    },
+                    control: Toggle,
+                    default: "true",
+                ),
+                Setting(
+                    key: "network",
+                    label: { "": "Network", "uk": "Мережа" },
+                    description: {
+                        "": "Received and sent bytes on every interface except loopback.",
+                        "uk": "Прийняті та надіслані байти на всіх інтерфейсах, крім петльового.",
+                    },
+                    control: Toggle,
+                    default: "false",
+                ),
+                Setting(
+                    key: "swap",
+                    label: { "": "Swap", "uk": "Підкачка" },
+                    control: Toggle,
+                    default: "false",
+                ),
+                Setting(
+                    key: "load",
+                    label: { "": "Load average", "uk": "Середнє навантаження" },
+                    description: {
+                        "": "One-minute load average.",
+                        "uk": "Середнє навантаження за хвилину.",
+                    },
+                    control: Toggle,
+                    default: "false",
+                ),
+                Setting(
+                    key: "disk",
+                    label: { "": "Disk", "uk": "Диск" },
+                    description: {
+                        "": "Bytes read and written on whole block devices.",
+                        "uk": "Прочитані та записані байти на цілих блокових пристроях.",
+                    },
+                    control: Toggle,
+                    default: "false",
+                ),
+            ],
+        ),
+        (
+            title: { "": "Size and rate", "uk": "Розмір і частота" },
+            rows: [
+                Setting(
+                    key: "graph_width",
+                    label: { "": "Graph width", "uk": "Ширина графіка" },
+                    description: {
+                        "": "In pixels, one per graph. One sample is drawn one pixel wide, so this is also how far back the history goes.",
+                        "uk": "У пікселях, однакова для всіх графіків. Одна вибірка малюється шириною в піксель, тож це водночас і глибина історії.",
+                    },
+                    control: Number(min: 10.0, max: 200.0, step: 2.0),
+                    default: "40",
+                ),
+                Setting(
+                    key: "interval_ms",
+                    label: { "": "Update interval", "uk": "Проміжок оновлення" },
+                    description: {
+                        "": "In milliseconds. A shorter interval means a livelier graph and more work for the panel.",
+                        "uk": "У мілісекундах. Менший проміжок дає жвавіший графік і більше роботи панелі.",
+                    },
+                    control: Number(min: 250.0, max: 10000.0, step: 250.0),
+                    default: "1000",
+                ),
+            ],
+        ),
+        (
+            title: { "": "Colors", "uk": "Кольори" },
+            rows: [
+                Note(text: {
+                    "": "Hex, like #0078D7. An empty field takes the color from the desktop theme.",
+                    "uk": "Шістнадцятковий запис, наприклад #0078D7. Порожнє поле бере колір із теми стільниці.",
+                }),
+                Setting(
+                    key: "color_cpu_user",
+                    label: { "": "Processor: user", "uk": "Процесор: користувач" },
+                    control: Text(placeholder: { "": "#0078D7", "uk": "#0078D7" }, max_len: 9),
+                    default: "\"\"",
+                ),
+                Setting(
+                    key: "color_cpu_nice",
+                    label: { "": "Processor: nice", "uk": "Процесор: знижений пріоритет" },
+                    control: Text(max_len: 9),
+                    default: "\"\"",
+                ),
+                Setting(
+                    key: "color_cpu_system",
+                    label: { "": "Processor: system", "uk": "Процесор: система" },
+                    control: Text(max_len: 9),
+                    default: "\"\"",
+                ),
+                Setting(
+                    key: "color_cpu_iowait",
+                    label: { "": "Processor: iowait", "uk": "Процесор: очікування вводу-виводу" },
+                    control: Text(max_len: 9),
+                    default: "\"\"",
+                ),
+                Setting(
+                    key: "color_mem_used",
+                    label: { "": "Memory: used", "uk": "Памʼять: зайнято" },
+                    control: Text(max_len: 9),
+                    default: "\"\"",
+                ),
+                Setting(
+                    key: "color_mem_buffers",
+                    label: { "": "Memory: buffers", "uk": "Памʼять: буфери" },
+                    control: Text(max_len: 9),
+                    default: "\"\"",
+                ),
+                Setting(
+                    key: "color_mem_cached",
+                    label: { "": "Memory: cache", "uk": "Памʼять: кеш" },
+                    control: Text(max_len: 9),
+                    default: "\"\"",
+                ),
+                Setting(
+                    key: "color_net_in",
+                    label: { "": "Network: in", "uk": "Мережа: прийом" },
+                    control: Text(max_len: 9),
+                    default: "\"\"",
+                ),
+                Setting(
+                    key: "color_net_out",
+                    label: { "": "Network: out", "uk": "Мережа: передача" },
+                    control: Text(max_len: 9),
+                    default: "\"\"",
+                ),
+                Setting(
+                    key: "color_swap_used",
+                    label: { "": "Swap: used", "uk": "Підкачка: зайнято" },
+                    control: Text(max_len: 9),
+                    default: "\"\"",
+                ),
+                Setting(
+                    key: "color_load_avg",
+                    label: { "": "Load average", "uk": "Середнє навантаження" },
+                    control: Text(max_len: 9),
+                    default: "\"\"",
+                ),
+                Setting(
+                    key: "color_disk_read",
+                    label: { "": "Disk: read", "uk": "Диск: читання" },
+                    control: Text(max_len: 9),
+                    default: "\"\"",
+                ),
+                Setting(
+                    key: "color_disk_write",
+                    label: { "": "Disk: write", "uk": "Диск: запис" },
+                    control: Text(max_len: 9),
+                    default: "\"\"",
+                ),
+                Setting(
+                    key: "color_background",
+                    label: { "": "Graph background", "uk": "Тло графіка" },
+                    control: Text(max_len: 9),
+                    default: "\"\"",
+                ),
+                Setting(
+                    key: "color_border",
+                    label: { "": "Graph border", "uk": "Рамка графіка" },
+                    control: Text(max_len: 9),
+                    default: "\"\"",
+                ),
+            ],
+        ),
+    ],
+)

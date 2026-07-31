@@ -1,0 +1,14 @@
+[Desktop Entry]
+Name=System Monitor
+Comment=Load graphs for processor, memory, network, swap, load average and disk
+Type=Application
+Exec=wmde-applet-sysmon
+Terminal=false
+Categories=WMDE;
+Keywords=WMDE;Applet;System;Monitor;Load;Graph;Processor;Memory;
+Icon=fun.wmde.AppletSysmon-symbolic
+StartupNotify=true
+NoDisplay=true
+X-CosmicApplet=true
+X-CosmicShrinkable=true
+X-OverflowPriority=10

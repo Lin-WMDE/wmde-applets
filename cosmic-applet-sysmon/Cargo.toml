@@ -1,0 +1,20 @@
+[package]
+name = "cosmic-applet-sysmon"
+version = "1.0.15"
+edition = "2024"
+license = "GPL-3.0-only"
+
+# No sampling crate on purpose: `sysinfo` and `procfs` walk the whole of
+# /proc and allocate per call, which is the opposite of what an applet that
+# ticks once a second for the whole session needs. The collector is std.
+[dependencies]
+cosmic-applets-config.workspace = true
+cosmic-config.workspace = true
+i18n-embed-fl.workspace = true
+i18n-embed.workspace = true
+libcosmic.workspace = true
+rust-embed.workspace = true
+tokio.workspace = true
+tracing-log.workspace = true
+tracing-subscriber.workspace = true
+tracing.workspace = true

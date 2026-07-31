@@ -72,6 +72,12 @@ fn main() {
             "cosmic-applet-status-area-keywords",
         ),
         (
+            "fun.wmde.AppletSysmon",
+            "cosmic-applet-sysmon",
+            "cosmic-applet-sysmon-comment",
+            "cosmic-applet-sysmon-keywords",
+        ),
+        (
             "fun.wmde.AppletTiling",
             "cosmic-applet-tiling",
             "cosmic-applet-tiling-comment",
