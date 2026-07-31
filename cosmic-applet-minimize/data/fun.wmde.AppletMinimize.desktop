@@ -14,3 +14,4 @@ X-MinimizeApplet=10
 X-HostWaylandDisplay=true
 X-OverflowPriority=50
 X-OverflowMinSize=2
+X-WmdeSingleInstance=true

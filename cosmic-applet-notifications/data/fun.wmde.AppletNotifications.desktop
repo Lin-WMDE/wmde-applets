@@ -13,3 +13,4 @@ X-CosmicShrinkable=true
 X-NotificationsApplet=true
 X-CosmicHoverPopup=Auto
 X-OverflowPriority=10
+X-WmdeSingleInstance=true
