@@ -47,17 +47,53 @@
             rows: [
                 Setting(
                     key: "max_notifications",
-                    label: {
-                        "": "Show at most",
-                        "uk": "Показувати не більше",
-                    },
-                    control: Choice(style: Radio, items: [
-                        (value: "1",  label: { "": "1 notification",   "uk": "1 сповіщення" }),
-                        (value: "3",  label: { "": "3 notifications",  "uk": "3 сповіщення" }),
-                        (value: "5",  label: { "": "5 notifications",  "uk": "5 сповіщень" }),
-                        (value: "10", label: { "": "10 notifications", "uk": "10 сповіщень" }),
-                    ]),
+                    label: { "": "Banners at once", "uk": "Вікон одночасно" },
+                    control: Number(min: 1, max: 10),
                     default: "3",
+                ),
+                Setting(
+                    key: "max_per_app",
+                    label: { "": "Banners from one app", "uk": "Вікон від одного застосунку" },
+                    description: {
+                        "": "Urgent notifications ignore this limit.",
+                        "uk": "Термінові сповіщення цю межу не враховують.",
+                    },
+                    control: Number(min: 1, max: 10),
+                    default: "2",
+                ),
+            ],
+        ),
+        (
+            // Every one of these three is Option<u32> in the daemon: the toggle is how a
+            // schema says "no limit at all", which a spin button alone cannot express.
+            title: { "": "How long a banner stays", "uk": "Скільки висить вікно" },
+            rows: [
+                Setting(
+                    key: "max_timeout_urgent",
+                    label: { "": "Urgent", "uk": "Термінові" },
+                    control: Number(
+                        min: 500, max: 60000, step: 500, optional: true,
+                        suffix: { "": "ms", "uk": "мс" },
+                    ),
+                    default: "None",
+                ),
+                Setting(
+                    key: "max_timeout_normal",
+                    label: { "": "Normal", "uk": "Звичайні" },
+                    control: Number(
+                        min: 500, max: 60000, step: 500, optional: true,
+                        suffix: { "": "ms", "uk": "мс" },
+                    ),
+                    default: "Some(5000)",
+                ),
+                Setting(
+                    key: "max_timeout_low",
+                    label: { "": "Low priority", "uk": "Неважливі" },
+                    control: Number(
+                        min: 500, max: 60000, step: 500, optional: true,
+                        suffix: { "": "ms", "uk": "мс" },
+                    ),
+                    default: "Some(3000)",
                 ),
             ],
         ),

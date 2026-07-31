@@ -1,0 +1,29 @@
+// WMDE applet settings schema. See .doc/settings/08-applet-schemas.md.
+(
+    schema: 1,
+    config: (id: "fun.wmde.AppletAudio", version: 1),
+    groups: [
+        (
+            title: { "": "Panel", "uk": "Панель" },
+            rows: [
+                Setting(
+                    key: "show_media_controls_in_top_panel",
+                    label: {
+                        "": "Media controls in the panel",
+                        "uk": "Керування відтворенням на панелі",
+                    },
+                    description: {
+                        "": "Show play, pause and track buttons next to the volume icon.",
+                        "uk": "Показувати кнопки відтворення поряд зі значком гучності.",
+                    },
+                    control: Toggle,
+                    default: "false",
+                ),
+                Note(text: {
+                    "": "Devices, volume limits and profiles live in Sound.",
+                    "uk": "Пристрої, межі гучності та профілі - у розділі «Звук».",
+                }),
+            ],
+        ),
+    ],
+)

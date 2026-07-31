@@ -1,0 +1,53 @@
+// WMDE applet settings schema. See .doc/settings/08-applet-schemas.md.
+(
+    schema: 1,
+    config: (id: "fun.wmde.AppList", version: 1),
+    groups: [
+        (
+            title: { "": "Task list", "uk": "Список завдань" },
+            rows: [
+                Setting(
+                    key: "enable_drag_source",
+                    label: { "": "Drag icons out of the list", "uk": "Перетягувати значки зі списку" },
+                    description: {
+                        "": "Lets an icon be dropped onto another application.",
+                        "uk": "Дозволяє кинути значок на інший застосунок.",
+                    },
+                    control: Toggle,
+                    default: "true",
+                ),
+                Note(text: {
+                    "": "Pinned applications are managed by right-clicking an icon in the panel.",
+                    "uk": "Закріпленими застосунками керує контекстне меню значка на панелі.",
+                }),
+            ],
+        ),
+        (
+            // Option<ToplevelFilter> in the applet. The schema vocabulary has no notion of
+            // an optional enum, and needs none: a choice value is raw RON text, so the
+            // three states are spelled exactly as they sit on disk.
+            title: { "": "Which windows are shown", "uk": "Які вікна показувати" },
+            rows: [
+                Setting(
+                    key: "filter_top_levels",
+                    label: { "": "Show windows", "uk": "Показувати вікна" },
+                    control: Choice(style: Radio, items: [
+                        (value: "None", label: {
+                            "": "From every workspace and display",
+                            "uk": "З усіх робочих столів і моніторів",
+                        }),
+                        (value: "Some(ActiveWorkspace)", label: {
+                            "": "From the current workspace only",
+                            "uk": "Лише з поточного робочого столу",
+                        }),
+                        (value: "Some(ConfiguredOutput)", label: {
+                            "": "From this display only",
+                            "uk": "Лише з цього монітора",
+                        }),
+                    ]),
+                    default: "None",
+                ),
+            ],
+        ),
+    ],
+)

@@ -1,0 +1,36 @@
+// WMDE applet settings schema. See .doc/settings/08-applet-schemas.md.
+//
+// Only the two keys that have no interface anywhere else. The other four are edited on
+// the Date & Time page, which owns the clock as a whole; duplicating them here would put
+// a third writer into one config file.
+(
+    schema: 1,
+    config: (id: "fun.wmde.AppletTime", version: 1),
+    groups: [
+        (
+            title: { "": "Panel", "uk": "Панель" },
+            rows: [
+                Setting(
+                    key: "show_weekday",
+                    label: { "": "Show the day of the week", "uk": "Показувати день тижня" },
+                    control: Toggle,
+                    default: "false",
+                ),
+                Setting(
+                    key: "format_strftime",
+                    label: { "": "Custom format", "uk": "Власний формат" },
+                    description: {
+                        "": "strftime format, for example %H:%M. Empty means the default.",
+                        "uk": "Формат strftime, наприклад %H:%M. Порожньо - типовий вигляд.",
+                    },
+                    control: Text(max_len: 64),
+                    default: "\"\"",
+                ),
+                Note(text: {
+                    "": "Time zone, 24-hour clock and the first day of the week are in Date & Time.",
+                    "uk": "Часовий пояс, 24-годинний формат і перший день тижня - у розділі «Дата і час».",
+                }),
+            ],
+        ),
+    ],
+)
