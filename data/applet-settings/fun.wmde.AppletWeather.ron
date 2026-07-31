@@ -1,0 +1,90 @@
+// WMDE applet settings schema. See .doc/settings/08-applet-schemas.md.
+//
+// Every stored key is here. The one thing that is not a key - searching for a city -
+// stays in the applet's own window: it is a network query that writes three keys at
+// once, which no declarative schema can describe.
+(
+    schema: 1,
+    config: (id: "fun.wmde.AppletWeather", version: 1),
+    groups: [
+        (
+            title: { "": "Location", "uk": "Розташування" },
+            rows: [
+                Setting(
+                    key: "city_name",
+                    label: { "": "City", "uk": "Місто" },
+                    description: {
+                        "": "Shown in the popup. It does not move the location by itself.",
+                        "uk": "Показується у спливному вікні. Саме собою розташування не змінює.",
+                    },
+                    control: Text(max_len: 64),
+                    default: "\"Kyiv\"",
+                ),
+                Setting(
+                    key: "latitude",
+                    label: { "": "Latitude", "uk": "Широта" },
+                    control: Number(min: -90.0, max: 90.0, step: 0.01, decimals: 4),
+                    default: "50.4501",
+                ),
+                Setting(
+                    key: "longitude",
+                    label: { "": "Longitude", "uk": "Довгота" },
+                    control: Number(min: -180.0, max: 180.0, step: 0.01, decimals: 4),
+                    default: "30.5234",
+                ),
+                External(
+                    exec: "wmde-weather-settings",
+                    label: { "": "Find a city", "uk": "Знайти місто" },
+                ),
+            ],
+        ),
+        (
+            title: { "": "Units", "uk": "Одиниці" },
+            rows: [
+                Setting(
+                    key: "unit",
+                    label: { "": "Temperature", "uk": "Температура" },
+                    control: Choice(items: [
+                        (value: "Celsius",    label: { "": "Celsius, C",    "uk": "Цельсій, C" }),
+                        (value: "Fahrenheit", label: { "": "Fahrenheit, F", "uk": "Фаренгейт, F" }),
+                    ]),
+                    default: "Celsius",
+                ),
+                Setting(
+                    key: "wind_unit",
+                    label: { "": "Wind speed", "uk": "Швидкість вітру" },
+                    control: Choice(items: [
+                        (value: "MetersPerSecond",   label: { "": "m/s",  "uk": "м/с" }),
+                        (value: "KilometersPerHour", label: { "": "km/h", "uk": "км/год" }),
+                    ]),
+                    default: "MetersPerSecond",
+                ),
+                Setting(
+                    key: "pressure_unit",
+                    label: { "": "Pressure", "uk": "Тиск" },
+                    control: Choice(items: [
+                        (value: "Hectopascal",          label: { "": "hPa",  "uk": "гПа" }),
+                        (value: "MillimetersOfMercury", label: { "": "mmHg", "uk": "мм рт. ст." }),
+                        (value: "InchesOfMercury",      label: { "": "inHg", "uk": "дюйм рт. ст." }),
+                    ]),
+                    default: "Hectopascal",
+                ),
+            ],
+        ),
+        (
+            title: { "": "Updates", "uk": "Оновлення" },
+            rows: [
+                Setting(
+                    key: "update_interval_minutes",
+                    label: { "": "Refresh every", "uk": "Оновлювати кожні" },
+                    control: Number(
+                        min: 5, max: 1440, step: 5,
+                        suffix: { "": "min", "uk": "хв" },
+                    ),
+                    default: "10",
+                ),
+                Note(text: { "": "Data by Open-Meteo.", "uk": "Дані Open-Meteo." }),
+            ],
+        ),
+    ],
+)

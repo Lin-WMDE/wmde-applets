@@ -1,0 +1,17 @@
+// WMDE applet settings schema. See .doc/settings/08-applet-schemas.md.
+//
+// This applet stores nothing of its own: it is a panel view onto settings that already
+// have a page. The schema exists so that the applet is not a dead end.
+(
+    schema: 1,
+    config: (id: "fun.wmde.AppletWorkspaces", version: 1),
+    groups: [
+        (
+            title: { "": "Settings", "uk": "Налаштування" },
+            rows: [
+                Note(text: { "": "How many workspaces there are and where the switcher lives.", "uk": "Скільки робочих столів і де живе перемикач." }),
+                Link(page: "workspaces", label: { "": "Workspaces", "uk": "Робочі столи" }),
+            ],
+        ),
+    ],
+)

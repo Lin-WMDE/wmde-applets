@@ -26,9 +26,9 @@
                     control: Text(max_len: 64),
                     default: "\"\"",
                 ),
-                Note(text: {
-                    "": "Time zone, 24-hour clock and the first day of the week are in Date & Time.",
-                    "uk": "Часовий пояс, 24-годинний формат і перший день тижня - у розділі «Дата і час».",
+                Link(page: "time-date", label: {
+                    "": "Time zone, 24-hour clock, first day of the week",
+                    "uk": "Часовий пояс, 24-годинний формат, перший день тижня",
                 }),
             ],
         ),

@@ -1,9 +1,17 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-//! Standalone settings window (installed as wmde-weather-settings):
-//! city search via the Open-Meteo geocoding API, units and update
-//! interval. It writes the shared applet config; the running applet
-//! picks changes up through watch_config.
+//! Standalone settings window (installed as wmde-weather-settings): city search via the
+//! Open-Meteo geocoding API, and nothing else.
+//!
+//! Everything that is a plain stored value - units, update interval, the coordinates
+//! themselves - is edited in Settings, built from
+//! `/usr/share/wmde/applet-settings/fun.wmde.AppletWeather.ron`. What is left here is the
+//! one thing a declarative schema cannot describe: a network query whose result writes
+//! three keys at once.
+//!
+//! Those three keys are written one at a time rather than with `write_entry`. Settings
+//! writes the same config, and writing the whole struct would push this window's stale
+//! copy of the units back over whatever was just chosen there.
 
 use crate::fl;
 use crate::localize::LANGUAGE_LOADER;
@@ -12,19 +20,15 @@ use cosmic::{
     Element, Task, app,
     iced::{Alignment, Length, Limits},
     theme,
-    widget::{Column, button, container, radio, scrollable, text, text_input},
+    widget::{Column, button, container, scrollable, text, text_input},
 };
-use cosmic_applets_config::weather::{
-    PressureUnit, TemperatureUnit, WeatherAppletConfig, WindUnit,
-};
-use cosmic_config::CosmicConfigEntry;
+use cosmic_applets_config::weather::WeatherAppletConfig;
+use cosmic_config::{ConfigSet, CosmicConfigEntry};
 use i18n_embed::LanguageLoader;
-
-const INTERVALS: [u32; 6] = [5, 10, 30, 60, 720, 1440];
 
 pub fn run() -> cosmic::iced::Result {
     let settings = cosmic::app::Settings::default()
-        .size_limits(Limits::NONE.width(560.0).height(700.0))
+        .size_limits(Limits::NONE.width(480.0).height(420.0))
         .resizable(Some(0.0));
     cosmic::app::run::<SettingsApp>(settings, ())
 }
@@ -38,7 +42,6 @@ struct SettingsApp {
     searching: bool,
     searched: bool,
     search_failed: bool,
-    interval_labels: Vec<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -47,21 +50,6 @@ enum Message {
     Search,
     SearchResults(Option<Vec<CityMatch>>),
     SelectCity(usize),
-    UnitSelected(TemperatureUnit),
-    WindUnitSelected(WindUnit),
-    PressureUnitSelected(PressureUnit),
-    IntervalSelected(usize),
-}
-
-fn interval_label(minutes: u32) -> String {
-    match minutes {
-        5 => fl!("interval-5"),
-        10 => fl!("interval-10"),
-        30 => fl!("interval-30"),
-        60 => fl!("interval-60"),
-        720 => fl!("interval-720"),
-        _ => fl!("interval-1440"),
-    }
 }
 
 fn city_label(city: &CityMatch) -> String {
@@ -78,13 +66,26 @@ fn city_label(city: &CityMatch) -> String {
 }
 
 impl SettingsApp {
-    fn save(&self) {
-        if let Some(handler) = self.handler.as_ref() {
-            if let Err(err) = self.config.write_entry(handler) {
-                tracing::error!(?err, "failed to write weather applet config");
+    /// Write the three keys a city choice sets, one at a time.
+    fn save_location(&self) {
+        let Some(handler) = self.handler.as_ref() else {
+            tracing::error!("config handler unavailable; weather location not persisted");
+            return;
+        };
+
+        let writes: [(&str, Result<(), cosmic_config::Error>); 3] = [
+            ("latitude", handler.set("latitude", self.config.latitude)),
+            ("longitude", handler.set("longitude", self.config.longitude)),
+            (
+                "city_name",
+                handler.set("city_name", self.config.city_name.clone()),
+            ),
+        ];
+
+        for (key, result) in writes {
+            if let Err(err) = result {
+                tracing::error!(key, ?err, "failed to write weather applet config");
             }
-        } else {
-            tracing::error!("config handler unavailable; weather config not persisted");
         }
     }
 }
@@ -112,7 +113,6 @@ impl cosmic::Application for SettingsApp {
                 searching: false,
                 searched: false,
                 search_failed: false,
-                interval_labels: INTERVALS.iter().map(|m| interval_label(*m)).collect(),
             },
             Task::none(),
         )
@@ -162,25 +162,7 @@ impl cosmic::Application for SettingsApp {
                     self.city_query = city.name.clone();
                     self.results.clear();
                     self.searched = false;
-                    self.save();
-                }
-            }
-            Message::UnitSelected(unit) => {
-                self.config.unit = unit;
-                self.save();
-            }
-            Message::WindUnitSelected(unit) => {
-                self.config.wind_unit = unit;
-                self.save();
-            }
-            Message::PressureUnitSelected(unit) => {
-                self.config.pressure_unit = unit;
-                self.save();
-            }
-            Message::IntervalSelected(index) => {
-                if let Some(minutes) = INTERVALS.get(index) {
-                    self.config.update_interval_minutes = *minutes;
-                    self.save();
+                    self.save_location();
                 }
             }
         }
@@ -239,88 +221,12 @@ impl cosmic::Application for SettingsApp {
             location = location.push(text::body(fl!("no-results")));
         }
 
-        let units = Column::new()
-            .push(text::heading(fl!("temperature")))
-            .push(
-                cosmic::iced::widget::row![
-                    radio(
-                        text::body("\u{b0}C"),
-                        TemperatureUnit::Celsius,
-                        Some(self.config.unit),
-                        Message::UnitSelected,
-                    ),
-                    radio(
-                        text::body("\u{b0}F"),
-                        TemperatureUnit::Fahrenheit,
-                        Some(self.config.unit),
-                        Message::UnitSelected,
-                    ),
-                ]
-                .spacing(spacing.space_m),
-            )
-            .push(text::heading(fl!("wind")))
-            .push(
-                cosmic::iced::widget::row![
-                    radio(
-                        text::body(fl!("unit-ms")),
-                        WindUnit::MetersPerSecond,
-                        Some(self.config.wind_unit),
-                        Message::WindUnitSelected,
-                    ),
-                    radio(
-                        text::body(fl!("unit-kmh")),
-                        WindUnit::KilometersPerHour,
-                        Some(self.config.wind_unit),
-                        Message::WindUnitSelected,
-                    ),
-                ]
-                .spacing(spacing.space_m),
-            )
-            .push(text::heading(fl!("pressure")))
-            .push(
-                cosmic::iced::widget::row![
-                    radio(
-                        text::body(fl!("unit-hpa")),
-                        PressureUnit::Hectopascal,
-                        Some(self.config.pressure_unit),
-                        Message::PressureUnitSelected,
-                    ),
-                    radio(
-                        text::body(fl!("unit-mmhg")),
-                        PressureUnit::MillimetersOfMercury,
-                        Some(self.config.pressure_unit),
-                        Message::PressureUnitSelected,
-                    ),
-                    radio(
-                        text::body(fl!("unit-inhg")),
-                        PressureUnit::InchesOfMercury,
-                        Some(self.config.pressure_unit),
-                        Message::PressureUnitSelected,
-                    ),
-                ]
-                .spacing(spacing.space_m),
-            )
-            .spacing(spacing.space_xs);
-
-        let interval = Column::new()
-            .push(text::heading(fl!("update-interval")))
-            .push(cosmic::widget::dropdown(
-                &self.interval_labels,
-                INTERVALS
-                    .iter()
-                    .position(|m| *m == self.config.update_interval_minutes),
-                Message::IntervalSelected,
-            ))
-            .spacing(spacing.space_xs);
-
         let content = Column::new()
             .push(text::title3(fl!("settings-title")))
             .push(location)
-            .push(units)
-            .push(interval)
             .spacing(spacing.space_m)
             .padding(spacing.space_l)
-            .max_width(560);
+            .max_width(480);
 
         container(scrollable(content))
             .width(Length::Fill)

@@ -21,9 +21,9 @@
                     control: Toggle,
                     default: "false",
                 ),
-                Note(text: {
-                    "": "Power profiles and screen timeouts live in Power.",
-                    "uk": "Режими живлення та час до вимкнення екрана - у розділі «Живлення».",
+                Link(page: "power", label: {
+                    "": "Power profiles and screen timeouts",
+                    "uk": "Режими живлення та час до вимкнення екрана",
                 }),
             ],
         ),

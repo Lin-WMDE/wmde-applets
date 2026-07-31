@@ -19,9 +19,9 @@
                     control: Toggle,
                     default: "false",
                 ),
-                Note(text: {
-                    "": "Devices, volume limits and profiles live in Sound.",
-                    "uk": "Пристрої, межі гучності та профілі - у розділі «Звук».",
+                Link(page: "sound", label: {
+                    "": "Devices, volume limits and profiles",
+                    "uk": "Пристрої, межі гучності та профілі",
                 }),
             ],
         ),
