@@ -67,10 +67,17 @@ cosmic-config = { path = "../libcosmic/cosmic-config" }
 serde = { version = "1.0.228", features = ["derive"] }
 zlink = "0.5.0"
 
+# WMDE: shared release profile, see .doc/perf.
+#  - panic = "abort" drops .eh_frame and .gcc_except_table; catch_unwind stops catching,
+#    which in this stack only guards SVG parsing in iced's vector backends.
+#  - lto = "fat" with one codegen unit removes what monomorphisation duplicated.
+# The LTO half is expensive and single threaded; FAST=1 turns it off for development
+# builds without touching panic or opt-level, so behaviour still matches what ships.
 [profile.release]
 opt-level = 3
 panic = "abort"
-lto = "thin"
+lto = "fat"
+codegen-units = 1
 
 [workspace.metadata.cargo-machete]
 ignored = ["libcosmic"]
