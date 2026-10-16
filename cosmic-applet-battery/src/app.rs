@@ -257,6 +257,8 @@ impl cosmic::Application for CosmicBatteryApplet {
                 icon_name: "battery-symbolic".to_string(),
                 display_icon_name: "display-brightness-symbolic".to_string(),
                 token_tx: None,
+                // WMDE: hidden until UPower reports a battery.
+                no_battery: true,
 
                 ..Default::default()
             },
@@ -432,6 +434,9 @@ impl cosmic::Application for CosmicBatteryApplet {
                 }
                 DeviceDbusEvent::NoBattery => {
                     self.no_battery = true;
+                    if let Some(p) = self.popup.take() {
+                        return destroy_popup(p);
+                    }
                 }
             },
             Message::KeyboardBacklight(event) => match event {
@@ -549,6 +554,16 @@ impl cosmic::Application for CosmicBatteryApplet {
     }
 
     fn view(&self) -> Element<Message> {
+        // WMDE: no battery, no icon, as on a Windows desktop - the window autosizes to nothing
+        // and the panel skips an applet of zero size. Power mode and brightness stay in Settings.
+        if self.no_battery {
+            return self
+                .core
+                .applet
+                .autosize_window(row(Vec::<Element<'_, Message>>::new()))
+                .into();
+        }
+
         let is_horizontal = match self.core.applet.anchor {
             PanelAnchor::Top | PanelAnchor::Bottom => true,
             PanelAnchor::Left | PanelAnchor::Right => false,

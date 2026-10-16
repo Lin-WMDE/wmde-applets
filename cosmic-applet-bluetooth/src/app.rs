@@ -44,6 +44,8 @@ struct CosmicBluetoothApplet {
     popup: Option<window::Id>,
     bluer_state: BluerState,
     bluer_sender: Option<Sender<BluerRequest>>,
+    /// WMDE: a Bluetooth adapter is present; without one the applet draws nothing.
+    adapter_present: bool,
     // UI state
     show_visible_devices: bool,
     request_confirmation: Option<(BluerDevice, String, Sender<bool>)>,
@@ -163,6 +165,15 @@ impl cosmic::Application for CosmicBluetoothApplet {
                 BluerEvent::Init { sender, state } => {
                     self.bluer_sender.replace(sender);
                     self.bluer_state = state;
+                    self.adapter_present = true;
+                }
+                BluerEvent::NoAdapter => {
+                    self.adapter_present = false;
+                    self.bluer_sender = None;
+                    if let Some(p) = self.popup.take() {
+                        set_discovery(false);
+                        return destroy_popup(p);
+                    }
                 }
                 BluerEvent::DevicesChanged { state } => {
                     self.bluer_state = state;
@@ -311,22 +322,41 @@ impl cosmic::Application for CosmicBluetoothApplet {
     }
 
     fn view(&self) -> Element<'_, Message> {
-        // WMDE: a bare glyph on the panel, and one that changes with the adapter state, so
-        // there is nothing stable to learn. applet_tooltip draws the hint as its own wayland
-        // subsurface and picks the side from the panel anchor.
-        let button = self
+        // WMDE: no adapter, no icon - the window autosizes to nothing and the panel skips an
+        // applet of zero size, as it does for an empty status area.
+        let content: Element<'_, Message> = if self.adapter_present {
+            // A bare glyph on the panel, and one that changes with the adapter state, so
+            // there is nothing stable to learn. applet_tooltip draws the hint as its own
+            // wayland subsurface and picks the side from the panel anchor.
+            let button = self
+                .core
+                .applet
+                .icon_button(&self.icon_name)
+                .on_press_down(Message::TogglePopup);
+
+            Element::from(self.core.applet.applet_tooltip(
+                Element::from(button),
+                fl!("bluetooth"),
+                self.popup.is_some(),
+                Message::Surface,
+                None,
+            ))
+        } else {
+            row(Vec::<Element<'_, Message>>::new()).into()
+        };
+
+        // In the overflow popup the bounds come configured and the window must not resize.
+        if self
             .core
             .applet
-            .icon_button(&self.icon_name)
-            .on_press_down(Message::TogglePopup);
-
-        Element::from(self.core.applet.applet_tooltip(
-            Element::from(button),
-            fl!("bluetooth"),
-            self.popup.is_some(),
-            Message::Surface,
-            None,
-        ))
+            .suggested_bounds
+            .as_ref()
+            .is_some_and(|c| c.width > 0. && c.height > 0.)
+        {
+            content
+        } else {
+            self.core.applet.autosize_window(content).into()
+        }
     }
 
     fn view_window(&self, _id: window::Id) -> Element<'_, Message> {

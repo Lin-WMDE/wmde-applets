@@ -14,7 +14,7 @@ use std::{
 };
 
 use bluer::{
-    Adapter, AdapterProperty, Address, Session, Uuid,
+    Adapter, AdapterProperty, Address, Session, SessionEvent, Uuid,
     agent::{Agent, AgentHandle},
 };
 
@@ -26,7 +26,10 @@ use cosmic::{
     },
 };
 
-use futures::{FutureExt, stream::FuturesUnordered};
+use futures::{
+    FutureExt,
+    stream::{BoxStream, FuturesUnordered},
+};
 use tokio::{
     spawn,
     sync::{
@@ -85,6 +88,37 @@ fn rfkill_path_var() -> std::ffi::OsString {
     path
 }
 
+/// WMDE: how long to wait before probing again when neither an adapter nor AdapterAdded shows
+/// up - the case of bluetoothd not running yet, which sends no signals at all.
+const ADAPTER_RETRY: Duration = Duration::from_secs(10);
+
+/// WMDE: returns on AdapterAdded or after `ADAPTER_RETRY`, whichever comes first.
+async fn wait_for_adapter(events: Option<BoxStream<'static, SessionEvent>>) {
+    let added = async {
+        if let Some(mut events) = events {
+            while let Some(event) = events.next().await {
+                if matches!(event, SessionEvent::AdapterAdded(_)) {
+                    return;
+                }
+            }
+        }
+        futures::future::pending::<()>().await;
+    };
+    _ = tokio::time::timeout(ADAPTER_RETRY, added).await;
+}
+
+/// WMDE: returns once the adapter named `name` is removed; never without an event stream.
+async fn adapter_removed(events: &mut Option<BoxStream<'static, SessionEvent>>, name: &str) {
+    if let Some(events) = events.as_mut() {
+        while let Some(event) = events.next().await {
+            if matches!(&event, SessionEvent::AdapterRemoved(n) if n == name) {
+                return;
+            }
+        }
+    }
+    futures::future::pending::<()>().await;
+}
+
 #[inline]
 pub fn bluetooth_subscription<I: 'static + Hash + Copy + Send + Sync + Debug>(
     id: I,
@@ -93,97 +127,128 @@ pub fn bluetooth_subscription<I: 'static + Hash + Copy + Send + Sync + Debug>(
         stream::channel(
             50,
             move |mut output: futures::channel::mpsc::Sender<BluerEvent>| async move {
-                let mut retry_count = 0u32;
-
-                // Initialize connection.
-                let mut session_state = loop {
-                    if let Ok(session) = Session::new().await {
-                        if let Ok(state) = BluerSessionState::new(session).await {
-                            break state;
-                        }
-                    }
-
-                    retry_count = retry_count.saturating_add(1);
-                    () = tokio::time::sleep(Duration::from_millis(
-                        2_u64.saturating_pow(retry_count).min(68719476734),
-                    ))
-                    .await;
-                };
-
-                let state = bluer_state(&session_state.adapter).await;
-
-                // reconnect to paired and trusted devices
-                if state.bluetooth_enabled {
-                    for d in &state.devices {
-                        if d.paired_and_trusted()
-                            && !matches!(d.status, BluerDeviceStatus::Connected)
-                        {
-                            _ = session_state
-                                .req_tx
-                                .send(BluerRequest::ConnectDevice(d.address))
-                                .await;
-                        }
-                    }
-                }
-                _ = output
-                    .send(BluerEvent::Init {
-                        sender: session_state.req_tx.clone(),
-                        state: state.clone(),
-                    })
-                    .await;
-
-                let mut event_handler = async |event| {
-                    let message = match event {
-                        BluerSessionEvent::ChangesProcessed(state) => {
-                            BluerEvent::DevicesChanged { state }
-                        }
-
-                        BluerSessionEvent::RequestResponse {
-                            req,
-                            state,
-                            err_msg,
-                        } => BluerEvent::RequestResponse {
-                            req,
-                            state,
-                            err_msg,
-                        },
-
-                        BluerSessionEvent::AgentEvent(e) => BluerEvent::AgentEvent(e),
-
-                        _ => return,
-                    };
-
-                    _ = output.send(message).await;
-                };
-
-                let mut interval = tokio::time::interval(Duration::from_secs(10));
-                interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
+                // WMDE: wait for an adapter instead of retrying with a pause that doubles every
+                // time (2^n ms - hours after a few dozen misses, so a dongle plugged in later
+                // went unseen), and tell the applet there is none so it can hide. BlueZ
+                // announces a new adapter with AdapterAdded; the timer covers bluetoothd itself
+                // coming up later. A removed adapter sends the stream back to this wait.
                 loop {
-                    let Some(mut session_rx) = session_state.rx.take() else {
-                        break;
-                    };
-
-                    if let Some(event) = session_rx.recv().await {
-                        event_handler(event).await;
-                        // Consume any additional available events.
-                        let mut count = 0;
-                        while let Ok(event) = session_rx.try_recv() {
-                            event_handler(event).await;
-                            count += 1;
-                            if count == 100 {
-                                break;
+                    let mut announced = false;
+                    let (mut session_state, mut adapter_events) = loop {
+                        if let Ok(session) = Session::new().await {
+                            // Subscribe before probing, so an adapter added in between is not missed.
+                            let events = session.events().await.ok().map(StreamExt::boxed);
+                            if session.default_adapter().await.is_ok() {
+                                if let Ok(state) = BluerSessionState::new(session).await {
+                                    break (state, events);
+                                }
+                            } else {
+                                if !announced {
+                                    announced = true;
+                                    _ = output.send(BluerEvent::NoAdapter).await;
+                                }
+                                wait_for_adapter(events).await;
+                                continue;
                             }
                         }
-                    } else {
-                        break;
+
+                        if !announced {
+                            announced = true;
+                            _ = output.send(BluerEvent::NoAdapter).await;
+                        }
+                        () = tokio::time::sleep(ADAPTER_RETRY).await;
+                    };
+                    let adapter_name = session_state.adapter.name().to_string();
+
+                    let state = bluer_state(&session_state.adapter).await;
+
+                    // reconnect to paired and trusted devices
+                    if state.bluetooth_enabled {
+                        for d in &state.devices {
+                            if d.paired_and_trusted()
+                                && !matches!(d.status, BluerDeviceStatus::Connected)
+                            {
+                                _ = session_state
+                                    .req_tx
+                                    .send(BluerRequest::ConnectDevice(d.address))
+                                    .await;
+                            }
+                        }
+                    }
+                    _ = output
+                        .send(BluerEvent::Init {
+                            sender: session_state.req_tx.clone(),
+                            state: state.clone(),
+                        })
+                        .await;
+
+                    let mut event_handler = async |event| {
+                        let message = match event {
+                            BluerSessionEvent::ChangesProcessed(state) => {
+                                BluerEvent::DevicesChanged { state }
+                            }
+
+                            BluerSessionEvent::RequestResponse {
+                                req,
+                                state,
+                                err_msg,
+                            } => BluerEvent::RequestResponse {
+                                req,
+                                state,
+                                err_msg,
+                            },
+
+                            BluerSessionEvent::AgentEvent(e) => BluerEvent::AgentEvent(e),
+
+                            _ => return,
+                        };
+
+                        _ = output.send(message).await;
+                    };
+
+                    let mut interval = tokio::time::interval(Duration::from_secs(10));
+                    interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
+                    let mut adapter_gone = false;
+                    loop {
+                        let Some(mut session_rx) = session_state.rx.take() else {
+                            break;
+                        };
+
+                        let event = tokio::select! {
+                            event = session_rx.recv() => event,
+                            () = adapter_removed(&mut adapter_events, &adapter_name) => {
+                                adapter_gone = true;
+                                break;
+                            }
+                        };
+
+                        if let Some(event) = event {
+                            event_handler(event).await;
+                            // Consume any additional available events.
+                            let mut count = 0;
+                            while let Ok(event) = session_rx.try_recv() {
+                                event_handler(event).await;
+                                count += 1;
+                                if count == 100 {
+                                    break;
+                                }
+                            }
+                        } else {
+                            break;
+                        }
+
+                        session_state.rx = Some(session_rx);
+                        interval.tick().await;
                     }
 
-                    session_state.rx = Some(session_rx);
-                    interval.tick().await;
-                }
+                    if adapter_gone {
+                        _ = output.send(BluerEvent::NoAdapter).await;
+                        continue;
+                    }
 
-                _ = output.send(BluerEvent::Finished).await;
-                futures::future::pending().await
+                    _ = output.send(BluerEvent::Finished).await;
+                    futures::future::pending::<()>().await;
+                }
             },
         )
     })
@@ -214,6 +279,8 @@ pub enum BluerEvent {
     },
     AgentEvent(BluerAgentEvent),
     Finished,
+    /// WMDE: no adapter (or no bluetoothd); the applet hides until `Init` arrives.
+    NoAdapter,
 }
 
 #[derive(Debug, Clone, Default)]
