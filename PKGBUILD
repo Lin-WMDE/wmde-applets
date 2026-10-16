@@ -18,7 +18,10 @@ license=('GPL-3.0-only')
 # noto-fonts: ships Noto Sans / Noto Sans Mono, the families the applets render their
 # labels in. The theme is what NAMES them (fun.wmde.Tk moved to wmde-themes, which
 # declares the same dependency); this one keeps the applets standing on their own.
-depends=('glibc' 'gcc-libs' 'wayland' 'libxkbcommon' 'libpulse' 'pipewire' 'noto-fonts')
+# upower: the battery applet's charge level and power source; without it the applet never
+# hears about a battery.
+depends=('glibc' 'gcc-libs' 'wayland' 'libxkbcommon' 'libpulse' 'pipewire' 'noto-fonts'
+         'upower')
 # Not a hard dependency: without it a click on the system monitor does nothing,
 # which is the same as turning that setting off.
 optdepends=('wmde-taskmgr: a click on the system monitor applet opens it')
