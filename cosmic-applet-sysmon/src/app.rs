@@ -146,6 +146,9 @@ impl SysmonApplet {
                 Kind::Swap => sources.swap,
                 Kind::Load => sources.load,
                 Kind::Disk => sources.disk,
+                // WMDE: the graphics card is the task manager's graph; the panel has no
+                // source for it, so the kind is never enabled here.
+                Kind::Gpu => false,
             };
             if on {
                 self.kinds.push(kind);
@@ -206,6 +209,8 @@ impl SysmonApplet {
                     values[1] = sample.disk[1] as f32;
                     2
                 }
+                // Never enabled on the panel, see `apply_config`.
+                Kind::Gpu => continue,
             };
             self.rings[kind.index()].push(&values[..count]);
         }
@@ -267,6 +272,8 @@ impl SysmonApplet {
                 ),
                 fl!("what-disk"),
             ),
+            // Never enabled on the panel, see `apply_config`.
+            Kind::Gpu => return String::new(),
         };
         format!("{reading}\n{what}")
     }

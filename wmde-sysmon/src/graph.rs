@@ -39,6 +39,9 @@ pub enum Band {
     LoadAvg,
     DiskRead,
     DiskWrite,
+    /// WMDE: graphics card utilization. Only the task manager draws it; the panel applet has
+    /// no source for it and never enables the kind.
+    GpuBusy,
 }
 
 /// Which theme color a band takes when the config leaves it alone.
@@ -48,10 +51,13 @@ enum Role {
     Success,
     Destructive,
     Warning,
+    /// WMDE: the fifth device colour, the graphics card's - `accent_purple` of the theme's
+    /// palette, the only named colour left once the four roles are taken.
+    Gpu,
 }
 
 impl Band {
-    pub const ALL: [Band; 13] = [
+    pub const ALL: [Band; 14] = [
         Band::CpuUser,
         Band::CpuNice,
         Band::CpuSystem,
@@ -65,6 +71,7 @@ impl Band {
         Band::LoadAvg,
         Band::DiskRead,
         Band::DiskWrite,
+        Band::GpuBusy,
     ];
     pub const COUNT: usize = Band::ALL.len();
 
@@ -84,6 +91,7 @@ impl Band {
             Band::LoadAvg => "color_load_avg",
             Band::DiskRead => "color_disk_read",
             Band::DiskWrite => "color_disk_write",
+            Band::GpuBusy => "color_gpu_busy",
         }
     }
 
@@ -98,6 +106,7 @@ impl Band {
             Band::CpuNice | Band::MemBuffers => Role::Success,
             Band::CpuSystem | Band::NetOut | Band::DiskWrite => Role::Destructive,
             Band::CpuIowait | Band::MemCached => Role::Warning,
+            Band::GpuBusy => Role::Gpu,
         }
     }
 }
@@ -111,16 +120,19 @@ pub enum Kind {
     Swap,
     Load,
     Disk,
+    /// WMDE: a graphics card, drawn by the task manager only (see [`Band::GpuBusy`]).
+    Gpu,
 }
 
 impl Kind {
-    pub const ALL: [Kind; 6] = [
+    pub const ALL: [Kind; 7] = [
         Kind::Cpu,
         Kind::Memory,
         Kind::Network,
         Kind::Swap,
         Kind::Load,
         Kind::Disk,
+        Kind::Gpu,
     ];
     pub const COUNT: usize = Kind::ALL.len();
 
@@ -141,6 +153,7 @@ impl Kind {
             Kind::Swap => &[Band::SwapUsed],
             Kind::Load => &[Band::LoadAvg],
             Kind::Disk => &[Band::DiskRead, Band::DiskWrite],
+            Kind::Gpu => &[Band::GpuBusy],
         }
     }
 
@@ -165,7 +178,7 @@ impl Kind {
     /// an idle machine shows a flat line instead of amplified noise.
     const fn floor(self) -> Option<f32> {
         match self {
-            Kind::Cpu | Kind::Memory | Kind::Swap => None,
+            Kind::Cpu | Kind::Memory | Kind::Swap | Kind::Gpu => None,
             // 32 KiB/s and 1 MiB/s: below that the traffic is background
             // chatter nobody is watching for.
             Kind::Network => Some(32.0 * 1024.0),
@@ -282,6 +295,7 @@ impl Colors {
             Role::Success => palette.success_color(),
             Role::Destructive => palette.destructive_color(),
             Role::Warning => palette.warning_color(),
+            Role::Gpu => palette.palette.accent_purple,
         })
     }
 
