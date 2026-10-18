@@ -357,7 +357,15 @@ pub enum Style {
     /// There is no theme step for either - the grid is a property of the graph, not of the
     /// layout around it.
     Curve { cols: u16, rows: u16 },
+    /// WMDE: each band as a line of its own, on the grid `Curve` draws - the first with its
+    /// fill and a solid stroke, every other dashed and unfilled, all in the first band's
+    /// colour. The scale is the tallest band, not the sum. For a device whose two
+    /// directions are worth telling apart: a network card's receive and send.
+    Lines { cols: u16, rows: u16 },
 }
+
+/// The dash of every band but the first under [`Style::Lines`]: four pixels drawn, three left.
+pub const LINE_DASH: [f32; 2] = [4.0, 3.0];
 
 impl Default for Style {
     fn default() -> Self {
@@ -450,7 +458,7 @@ impl<'a> Strip<'a> {
                 false
             }
             // No plate: the window's own colour is the ground, and the grid is drawn over it.
-            Style::Curve { cols, rows } => {
+            Style::Curve { cols, rows } | Style::Lines { cols, rows } => {
                 self.draw_grid(frame, at, ink, cols, rows);
                 true
             }
@@ -460,7 +468,11 @@ impl<'a> Strip<'a> {
         let bands = kind.bands();
         let columns = ring.len().min(at.width as usize);
         if curve && columns > 0 {
-            self.draw_curve(frame, theme, kind, at, columns);
+            if matches!(self.style, Style::Lines { .. }) {
+                self.draw_lines(frame, theme, kind, at, columns);
+            } else {
+                self.draw_curve(frame, theme, kind, at, columns);
+            }
         } else if columns > 0 {
             let scale = normalizer(kind, ring, columns);
             // Newest sample at the right edge, like every strip chart.
@@ -628,6 +640,69 @@ impl<'a> Strip<'a> {
     }
 }
 
+impl Strip<'_> {
+    /// Every band as its own line: the first filled and solid, the rest dashed.
+    ///
+    /// Laid out exactly as [`Strip::draw_curve`] lays its one curve - newest sample pinned to
+    /// the right edge, a sample a span of time - so the two styles line up when a page shows
+    /// both.
+    fn draw_lines(
+        &self,
+        frame: &mut canvas::Frame,
+        theme: &cosmic::Theme,
+        kind: Kind,
+        at: Rectangle,
+        columns: usize,
+    ) {
+        let ring = &self.rings[kind.index()];
+        let bands = kind.bands();
+        let scale = band_normalizer(kind, ring, columns);
+        let bottom = at.y + at.height;
+        let column = |i: usize| ring.column(ring.len() - columns + i);
+        let step = curve_step(at.width, ring.capacity());
+        let newest = at.x + at.width;
+        let x_at = |i: usize| newest - (columns - 1 - i) as f32 * step;
+
+        let mut color = self.colors.band(bands[0], theme);
+        color.a = 1.0;
+        for band in 0..bands.len() {
+            let top_at = |i: usize| {
+                bottom
+                    - (column(i)[band] * scale * at.height)
+                        .round()
+                        .clamp(0.0, at.height)
+            };
+            let outline = canvas::Path::new(|builder| {
+                builder.move_to(Point::new(x_at(0), top_at(0)));
+                for i in 1..columns {
+                    builder.line_to(Point::new(x_at(i), top_at(i)));
+                }
+            });
+            let mut stroke = canvas::Stroke::default().with_color(color).with_width(1.0);
+            if band == 0 {
+                let area = canvas::Path::new(|builder| {
+                    builder.move_to(Point::new(x_at(0), bottom));
+                    for i in 0..columns {
+                        builder.line_to(Point::new(x_at(i), top_at(i)));
+                    }
+                    builder.line_to(Point::new(newest, bottom));
+                    builder.close();
+                });
+                let mut fill = color;
+                // The same mute as `draw_curve`, so a solid line fills as a curve does.
+                fill.a *= 0.39;
+                frame.fill(&area, fill);
+            } else {
+                stroke.line_dash = canvas::LineDash {
+                    segments: &LINE_DASH,
+                    offset: 0,
+                };
+            }
+            frame.stroke(&outline, stroke);
+        }
+    }
+}
+
 /// Distance along the graph between two neighbouring samples of a curve.
 ///
 /// `n` samples make `n - 1` gaps, so a full ring divided by the capacity itself leaves one
@@ -647,13 +722,26 @@ fn stack_height(values: &[f32], upto: usize, scale: f32, height: f32) -> f32 {
 
 /// Multiplier that turns a stored value into a fraction of the graph height.
 fn normalizer(kind: Kind, ring: &Ring, columns: usize) -> f32 {
+    scale_by(kind, ring, columns, |values| values.iter().sum())
+}
+
+/// The same for [`Style::Lines`], where the bands are drawn apart: the tallest single band
+/// fills the graph, not the sum of them.
+fn band_normalizer(kind: Kind, ring: &Ring, columns: usize) -> f32 {
+    scale_by(kind, ring, columns, |values| {
+        values.iter().copied().fold(0.0, f32::max)
+    })
+}
+
+/// `1 / peak`, where the peak is `measure` of the tallest column in view and never below the
+/// kind's floor. A kind without a floor is already a share of 1.0.
+fn scale_by(kind: Kind, ring: &Ring, columns: usize, measure: impl Fn(&[f32]) -> f32) -> f32 {
     let Some(floor) = kind.floor() else {
         return 1.0;
     };
     let mut peak = floor;
     for i in 0..columns {
-        let sum: f32 = ring.column(ring.len() - columns + i).iter().sum();
-        peak = peak.max(sum);
+        peak = peak.max(measure(ring.column(ring.len() - columns + i)));
     }
     1.0 / peak
 }
@@ -711,6 +799,25 @@ impl<'a, Message: 'a> From<Strip<'a>> for Element<'a, Message, cosmic::Theme, co
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Two directions drawn apart are scaled to the busier one: a sum would leave both lines
+    /// short of the top even at the window's peak.
+    #[test]
+    fn lines_scale_to_the_tallest_band_not_the_sum() {
+        let mut ring = Ring::new(2, 4);
+        let mib = 1024.0 * 1024.0;
+        ring.push(&[3.0 * mib, 1.0 * mib]);
+        ring.push(&[2.0 * mib, 2.0 * mib]);
+        assert_eq!(band_normalizer(Kind::Network, &ring, 2), 1.0 / (3.0 * mib));
+        assert_eq!(normalizer(Kind::Network, &ring, 2), 1.0 / (4.0 * mib));
+        // Below the floor both stop at the floor.
+        let mut quiet = Ring::new(2, 4);
+        quiet.push(&[10.0, 5.0]);
+        assert_eq!(
+            band_normalizer(Kind::Network, &quiet, 1),
+            normalizer(Kind::Network, &quiet, 1)
+        );
+    }
 
     #[test]
     fn ring_keeps_the_newest_samples() {
