@@ -381,6 +381,9 @@ pub struct Strip<'a> {
     cache: &'a canvas::Cache,
     metrics: Metrics,
     style: Style,
+    /// WMDE: a fixed top of the scale, in the units the ring holds, instead of the kind's own
+    /// - see [`Strip::ceiling`].
+    ceiling: Option<f32>,
 }
 
 impl<'a> Strip<'a> {
@@ -398,6 +401,7 @@ impl<'a> Strip<'a> {
             cache,
             metrics,
             style: Style::Bands,
+            ceiling: None,
         }
     }
 
@@ -405,6 +409,15 @@ impl<'a> Strip<'a> {
     #[must_use]
     pub fn style(mut self, style: Style) -> Self {
         self.style = style;
+        self
+    }
+
+    /// WMDE: draw against a fixed top instead of the kind's scale - a share of 1.0 in a kind
+    /// that otherwise scales to its busiest moment. The task manager draws a disk's active
+    /// time this way, so that it takes the disk's colour; the panel applet never calls it.
+    #[must_use]
+    pub fn ceiling(mut self, top: f32) -> Self {
+        self.ceiling = Some(top);
         self
     }
 
@@ -474,7 +487,7 @@ impl<'a> Strip<'a> {
                 self.draw_curve(frame, theme, kind, at, columns);
             }
         } else if columns > 0 {
-            let scale = normalizer(kind, ring, columns);
+            let scale = fixed_or(self.ceiling, || normalizer(kind, ring, columns));
             // Newest sample at the right edge, like every strip chart.
             let left = at.x + at.width - columns as f32;
             let bottom = at.y + at.height;
@@ -595,7 +608,7 @@ impl<'a> Strip<'a> {
     ) {
         let ring = &self.rings[kind.index()];
         let bands = kind.bands();
-        let scale = normalizer(kind, ring, columns);
+        let scale = fixed_or(self.ceiling, || normalizer(kind, ring, columns));
         let bottom = at.y + at.height;
         let column = |i: usize| ring.column(ring.len() - columns + i);
         let drawn = kind.curve_bands();
@@ -656,7 +669,7 @@ impl Strip<'_> {
     ) {
         let ring = &self.rings[kind.index()];
         let bands = kind.bands();
-        let scale = band_normalizer(kind, ring, columns);
+        let scale = fixed_or(self.ceiling, || band_normalizer(kind, ring, columns));
         let bottom = at.y + at.height;
         let column = |i: usize| ring.column(ring.len() - columns + i);
         let step = curve_step(at.width, ring.capacity());
@@ -718,6 +731,14 @@ fn curve_step(width: f32, capacity: usize) -> f32 {
 fn stack_height(values: &[f32], upto: usize, scale: f32, height: f32) -> f32 {
     let sum: f32 = values[..upto].iter().sum();
     (sum * scale * height).round().clamp(0.0, height)
+}
+
+/// The multiplier for a fixed top where one is set, otherwise the kind's own.
+fn fixed_or(ceiling: Option<f32>, scale: impl FnOnce() -> f32) -> f32 {
+    match ceiling {
+        Some(top) if top > 0.0 => 1.0 / top,
+        _ => scale(),
+    }
 }
 
 /// Multiplier that turns a stored value into a fraction of the graph height.
@@ -799,6 +820,24 @@ impl<'a, Message: 'a> From<Strip<'a>> for Element<'a, Message, cosmic::Theme, co
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// A fixed top wins over the kind's auto-scale: a disk's active time, a share of 1.0,
+    /// would otherwise be drawn against a megabyte a second and never leave the floor.
+    #[test]
+    fn a_ceiling_replaces_the_kinds_scale() {
+        let mut ring = Ring::new(2, 4);
+        ring.push(&[0.5, 0.0]);
+        assert_eq!(
+            fixed_or(Some(1.0), || normalizer(Kind::Disk, &ring, 1)),
+            1.0
+        );
+        assert_eq!(
+            fixed_or(None, || normalizer(Kind::Disk, &ring, 1)),
+            normalizer(Kind::Disk, &ring, 1)
+        );
+        // A top of nothing is no top.
+        assert_eq!(fixed_or(Some(0.0), || 0.25), 0.25);
+    }
 
     /// Two directions drawn apart are scaled to the busier one: a sum would leave both lines
     /// short of the top even at the window's peak.
