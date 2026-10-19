@@ -607,10 +607,19 @@ fn action_buttons(n: &Notification) -> Option<Element<'static, Message>> {
     let buttons: Vec<Element<'static, Message>> = n
         .buttons()
         .map(|(action, label)| {
-            button::standard(label.clone())
-                .width(Length::Fill)
-                .on_press(Message::ActivateNotification(n.id, Some(action.clone())))
-                .into()
+            // `button::standard` sizes only its inner row: the button itself stays as wide
+            // as the label, and a row of them never spreads over the card.
+            button::custom(
+                text::body(label.clone())
+                    .center()
+                    .width(Length::Fill)
+                    .height(Length::Fill),
+            )
+            .class(cosmic::theme::Button::Standard)
+            .width(Length::Fill)
+            .height(Length::Fixed(cosmic::theme::spacing().space_l.into()))
+            .on_press(Message::ActivateNotification(n.id, Some(action.clone())))
+            .into()
         })
         .collect();
     (!buttons.is_empty()).then(|| {
