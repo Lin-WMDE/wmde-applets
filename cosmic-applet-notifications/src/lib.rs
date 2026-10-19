@@ -615,6 +615,7 @@ fn action_buttons(n: &Notification) -> Option<Element<'static, Message>> {
         .collect();
     (!buttons.is_empty()).then(|| {
         cosmic::widget::row::with_children(buttons)
+            .width(Length::Fill)
             .spacing(8)
             .padding(cosmic::iced::Padding::ZERO.top(8))
             .into()
