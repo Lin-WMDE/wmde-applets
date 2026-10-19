@@ -73,7 +73,9 @@ enum Message {
     Config(NotificationsConfig),
     DbusEvent(subscriptions::dbus::Output),
     Dismissed(u32),
-    ActivateNotification(u32),
+    /// A click on a card sends `None`, its default; a button under the text sends its own
+    /// action.
+    ActivateNotification(u32, Option<ActionId>),
     ClearAll(Option<String>),
     CardsToggled(String, bool),
     Token(TokenUpdate),
@@ -341,7 +343,7 @@ impl cosmic::Application for Notifications {
                     tokio::spawn(cosmic::process::spawn(cmd));
                 }
             },
-            Message::ActivateNotification(id) => {
+            Message::ActivateNotification(id, action) => {
                 tracing::error!("Received notification action Message");
                 let Some(notification) = self
                     .cards
@@ -352,7 +354,11 @@ impl cosmic::Application for Notifications {
                 };
                 tracing::error!("Found notification for id");
 
-                let maybe_action = if notification
+                let maybe_action = if let Some(action) =
+                    action.filter(|a| notification.actions.iter().any(|(b, _)| b == a))
+                {
+                    Some(action.to_string())
+                } else if notification
                     .actions
                     .iter()
                     .any(|a| matches!(a.0, ActionId::Default))
@@ -500,6 +506,7 @@ impl cosmic::Application for Notifications {
                                         )
                                     ]
                                 )
+                                .push_maybe(action_buttons(n))
                                 .width(Length::Fill),
                             ),
                         )
@@ -537,7 +544,7 @@ impl cosmic::Application for Notifications {
                     notif_elems,
                     Message::ClearAll(Some(name.clone())),
                     Some(move |e| Message::CardsToggled(name.clone(), e)),
-                    Some(move |id| Message::ActivateNotification(ids[id])),
+                    Some(move |id| Message::ActivateNotification(ids[id], None)),
                     &c.3,
                     &c.4,
                     &c.5,
@@ -592,4 +599,24 @@ fn duration_ago_msg(notification: &Notification) -> String {
     } else {
         String::new()
     }
+}
+
+/// The row of action buttons under a card's text, as the popup draws it in
+/// `wmde-notifications`, or nothing when there is no action but the default one.
+fn action_buttons(n: &Notification) -> Option<Element<'static, Message>> {
+    let buttons: Vec<Element<'static, Message>> = n
+        .buttons()
+        .map(|(action, label)| {
+            button::standard(label.clone())
+                .width(Length::Fill)
+                .on_press(Message::ActivateNotification(n.id, Some(action.clone())))
+                .into()
+        })
+        .collect();
+    (!buttons.is_empty()).then(|| {
+        cosmic::widget::row::with_children(buttons)
+            .spacing(8)
+            .padding(cosmic::iced::Padding::ZERO.top(8))
+            .into()
+    })
 }
