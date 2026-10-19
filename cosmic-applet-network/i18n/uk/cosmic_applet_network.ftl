@@ -7,21 +7,26 @@ ipv4 = IPv4-адреса
 ipv6 = IPv6-адреса
 mac = MAC
 megabits-per-second = Мбіт/с
-connected = З'єднано
-connecting = З’єднання
-connect = З’єднати
+connected = Зʼєднано
+connecting = Зʼєднання
+connect = Зʼєднати
 cancel = Скасувати
 settings = Налаштування мережі...
 visible-wireless-networks = Видимі бездротові мережі
 enter-password = Введіть пароль або ключ шифрування
-router-wps-button = Також можна під’єднатися, натиснувши кнопку «WPS» на маршрутизаторі
-unable-to-connect = Не вдалося під’єднатися до мережі
-check-wifi-connection = Переконайтеся, що Wi-Fi під’єднано до Інтернету, а пароль — правильний
+router-wps-button = Також можна підʼєднатися, натиснувши кнопку «WPS» на маршрутизаторі
+unable-to-connect = Не вдалося підʼєднатися до мережі
+check-wifi-connection = Переконайтеся, що Wi-Fi підʼєднано до Інтернету, а пароль — правильний
 reset = Скинути
 identity = Ідентичність
-vpn-connections = VPN-з'єднання
+vpn-connections = VPN-зʼєднання
 gigabits-per-second = Гбіт/с
 terabits-per-second = Тбіт/с
 
+## WMDE: keys of our own, kept at the end of the file
+
 # Tooltip for the icon-only retry button on a failed known network
 retry = Повторити спробу
+
+# Caption under the name of each Wi-Fi adapter when the machine has more than one
+adapter = Адаптер

@@ -37,7 +37,7 @@ use cosmic::{
         stream,
         widget::canvas,
     },
-    surface, theme,
+    surface, theme, units,
     widget::{autosize, button, container},
 };
 use cosmic_applets_config::sysmon::SysmonAppletConfig;
@@ -239,24 +239,24 @@ impl SysmonApplet {
             Kind::Memory => (
                 fl!(
                     "tip-memory",
-                    used = fmt_size(s.mem[0]),
-                    total = fmt_size(s.mem_total)
+                    used = units::size(s.mem[0]),
+                    total = units::size(s.mem_total)
                 ),
                 fl!("what-memory"),
             ),
             Kind::Network => (
                 fl!(
                     "tip-network",
-                    rx = fmt_rate(s.net[0]),
-                    tx = fmt_rate(s.net[1])
+                    rx = units::rate(s.net[0]),
+                    tx = units::rate(s.net[1])
                 ),
                 fl!("what-network"),
             ),
             Kind::Swap => (
                 fl!(
                     "tip-swap",
-                    used = fmt_size(s.swap_used),
-                    total = fmt_size(s.swap_total)
+                    used = units::size(s.swap_used),
+                    total = units::size(s.swap_total)
                 ),
                 fl!("what-swap"),
             ),
@@ -267,8 +267,8 @@ impl SysmonApplet {
             Kind::Disk => (
                 fl!(
                     "tip-disk",
-                    read = fmt_rate(s.disk[0]),
-                    write = fmt_rate(s.disk[1])
+                    read = units::rate(s.disk[0]),
+                    write = units::rate(s.disk[1])
                 ),
                 fl!("what-disk"),
             ),
@@ -289,34 +289,6 @@ fn graph_thickness(panel_thickness: f32, percent: u32) -> f32 {
         .round()
         .max(MIN_THICKNESS)
         .min(panel_thickness)
-}
-
-const KIB: f64 = 1024.0;
-const MIB: f64 = 1024.0 * KIB;
-const GIB: f64 = 1024.0 * MIB;
-
-/// Binary units - the ones the kernel counts memory in.
-fn fmt_size(bytes: u64) -> String {
-    let value = bytes as f64;
-    if value >= GIB {
-        fl!("size-gib", value = format!("{:.1}", value / GIB))
-    } else if value >= MIB {
-        fl!("size-mib", value = format!("{:.1}", value / MIB))
-    } else if value >= KIB {
-        fl!("size-kib", value = format!("{:.0}", value / KIB))
-    } else {
-        fl!("size-b", value = bytes.to_string())
-    }
-}
-
-fn fmt_rate(bytes_per_second: f64) -> String {
-    if bytes_per_second >= MIB {
-        fl!("rate-mib", value = format!("{:.1}", bytes_per_second / MIB))
-    } else if bytes_per_second >= KIB {
-        fl!("rate-kib", value = format!("{:.0}", bytes_per_second / KIB))
-    } else {
-        fl!("rate-b", value = format!("{:.0}", bytes_per_second))
-    }
 }
 
 impl cosmic::Application for SysmonApplet {

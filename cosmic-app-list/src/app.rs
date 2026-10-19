@@ -22,10 +22,7 @@ use cctk::{
 };
 use cosmic::{
     Apply, Element, Task, app,
-    applet::{
-        Context, Size,
-        cosmic_panel_config::{PanelAnchor, PanelSize},
-    },
+    applet::{Context, cosmic_panel_config::PanelAnchor},
     cosmic_config::{Config, CosmicConfigEntry},
     desktop::IconSourceExt,
     iced::{
@@ -36,7 +33,7 @@ use cosmic::{
         platform_specific::shell::commands::popup::{destroy_popup, get_popup},
         runtime::{core::event, dnd::peek_dnd, platform_specific::wayland::CornerRadius},
         widget::{
-            Column, Row, column, mouse_area, row,
+            Column, Row, Space, column, mouse_area, row,
             space::{horizontal as horizontal_space, vertical as vertical_space},
             stack,
         },
@@ -76,8 +73,6 @@ pub fn run() -> cosmic::iced::Result {
 struct AppletIconData {
     icon_size: u16,
     icon_spacing: f32,
-    dot_radius: f32,
-    bar_size: f32,
     padding: Padding,
 }
 
@@ -94,53 +89,19 @@ impl AppletIconData {
         };
         let icon_spacing = applet.spacing as f32;
 
-        let (dot_radius, bar_size) = match applet.size {
-            Size::Hardcoded(_) => (2.0, 8.0),
-            Size::PanelSize(ref s) => {
-                let size = s.get_applet_icon_size_with_padding(false);
-                // Define size thresholds, to handle custom sizes
-                let small_size_threshold = PanelSize::S.get_applet_icon_size_with_padding(false);
-                let medium_size_threshold = PanelSize::M.get_applet_icon_size_with_padding(false);
-                if size <= small_size_threshold {
-                    (1.0, 8.0)
-                } else if size <= medium_size_threshold {
-                    (2.0, 8.0)
-                } else {
-                    (2.0, 12.0)
-                }
-            }
-        };
+        // WMDE: the running indicator takes its thickness out of the padding on the screen
+        // edge side, so the button keeps the thickness of the panel. One size for every panel
+        // size: a thin custom panel clamps the padding at zero rather than going negative.
+        let edge_padding = |padding: f32| (padding - INDICATOR_THICKNESS).max(0.0);
         let padding = match applet.anchor {
-            PanelAnchor::Top => [
-                v_padding - (dot_radius * 2. + 1.),
-                h_padding,
-                v_padding,
-                h_padding,
-            ],
-            PanelAnchor::Bottom => [
-                v_padding,
-                h_padding,
-                v_padding - (dot_radius * 2. + 1.),
-                h_padding,
-            ],
-            PanelAnchor::Left => [
-                v_padding,
-                h_padding,
-                v_padding,
-                h_padding - (dot_radius * 2. + 1.),
-            ],
-            PanelAnchor::Right => [
-                v_padding,
-                h_padding - (dot_radius * 2. + 1.),
-                v_padding,
-                h_padding,
-            ],
+            PanelAnchor::Top => [edge_padding(v_padding), h_padding, v_padding, h_padding],
+            PanelAnchor::Bottom => [v_padding, h_padding, edge_padding(v_padding), h_padding],
+            PanelAnchor::Left => [v_padding, h_padding, v_padding, edge_padding(h_padding)],
+            PanelAnchor::Right => [v_padding, edge_padding(h_padding), v_padding, h_padding],
         };
         AppletIconData {
             icon_size,
             icon_spacing,
-            dot_radius,
-            bar_size,
             padding: padding.into(),
         }
     }
@@ -219,39 +180,43 @@ impl DockItem {
         .width(app_icon.icon_size.into())
         .height(app_icon.icon_size.into());
 
+        // WMDE: a stroke along the screen edge, as on the Windows 11 taskbar. Its length tells
+        // focus only - the window count is in the popup - and with no window there is no
+        // stroke, but its thickness stays reserved so pinned and running icons line up.
         let indicator = {
-            let container = if toplevel_count <= 1 {
-                vertical_space().height(Length::Fixed(0.0))
+            let length = if toplevel_count == 0 {
+                0.0
+            } else if is_focused {
+                INDICATOR_ACTIVE_LENGTH
             } else {
-                match applet.anchor {
-                    PanelAnchor::Left | PanelAnchor::Right => {
-                        vertical_space().height(app_icon.bar_size)
-                    }
-                    PanelAnchor::Top | PanelAnchor::Bottom => {
-                        horizontal_space().width(app_icon.bar_size)
-                    }
-                }
-            }
-            .apply(container)
-            .padding(app_icon.dot_radius);
+                INDICATOR_RUNNING_LENGTH
+            };
+            let (width, height) = match applet.anchor {
+                PanelAnchor::Left | PanelAnchor::Right => (INDICATOR_THICKNESS, length),
+                PanelAnchor::Top | PanelAnchor::Bottom => (length, INDICATOR_THICKNESS),
+            };
+            let container = Space::new()
+                .width(Length::Fixed(width))
+                .height(Length::Fixed(height))
+                .apply(container);
 
             if toplevel_count == 0 {
                 container
             } else {
                 container.class(theme::Container::custom(move |theme| container::Style {
-                    background: if is_focused {
-                        Some(Background::Color(theme.cosmic().accent_color().into()))
+                    background: Some(Background::Color(if is_focused {
+                        theme.cosmic().accent_text_color().into()
                     } else {
-                        Some(Background::Color(theme.cosmic().on_bg_color().into()))
-                    },
+                        cosmic::widget::header_unfocused_color(theme)
+                    })),
                     border: Border {
                         radius: dot_border_radius.into(),
                         ..Default::default()
                     },
-                    // WMDE: the running-app indicator is 2-4px thick - the smallest mark in the
-                    // dock. Unsnapped it spreads over an extra row at partial alpha, so it looks
-                    // dim, and neighbouring icons get visibly different brightness depending on
-                    // where each lands on the fractional grid. The radius is clamped to half the
+                    // WMDE: the stroke is 3px thick - the smallest mark on the panel. Unsnapped
+                    // it spreads over an extra row at partial alpha, so it looks dim, and
+                    // neighbouring icons get visibly different brightness depending on where
+                    // each lands on the fractional grid. The radius is clamped to half the
                     // thickness, so snapping keeps the stadium shape.
                     snap: true,
                     ..Default::default()
@@ -260,38 +225,22 @@ impl DockItem {
         };
 
         let icon_wrapper: Element<_> = match applet.anchor {
-            PanelAnchor::Left => row([
-                indicator.into(),
-                horizontal_space().width(Length::Fixed(1.0)).into(),
-                cosmic_icon.clone().into(),
-            ])
-            .align_y(Alignment::Center)
-            .padding(app_icon.padding)
-            .into(),
-            PanelAnchor::Right => row([
-                cosmic_icon.clone().into(),
-                horizontal_space().width(Length::Fixed(1.0)).into(),
-                indicator.into(),
-            ])
-            .align_y(Alignment::Center)
-            .padding(app_icon.padding)
-            .into(),
-            PanelAnchor::Top => column([
-                indicator.into(),
-                vertical_space().height(Length::Fixed(1.0)).into(),
-                cosmic_icon.clone().into(),
-            ])
-            .align_x(Alignment::Center)
-            .padding(app_icon.padding)
-            .into(),
-            PanelAnchor::Bottom => column([
-                cosmic_icon.clone().into(),
-                vertical_space().height(Length::Fixed(1.0)).into(),
-                indicator.into(),
-            ])
-            .align_x(Alignment::Center)
-            .padding(app_icon.padding)
-            .into(),
+            PanelAnchor::Left => row([indicator.into(), cosmic_icon.clone().into()])
+                .align_y(Alignment::Center)
+                .padding(app_icon.padding)
+                .into(),
+            PanelAnchor::Right => row([cosmic_icon.clone().into(), indicator.into()])
+                .align_y(Alignment::Center)
+                .padding(app_icon.padding)
+                .into(),
+            PanelAnchor::Top => column([indicator.into(), cosmic_icon.clone().into()])
+                .align_x(Alignment::Center)
+                .padding(app_icon.padding)
+                .into(),
+            PanelAnchor::Bottom => column([cosmic_icon.clone().into(), indicator.into()])
+                .align_x(Alignment::Center)
+                .padding(app_icon.padding)
+                .into(),
         };
 
         // WMDE: the Unity progress fill lies under the icon and the running indicator and has
@@ -659,6 +608,19 @@ fn app_list_icon_style(selected: bool) -> cosmic::theme::Button {
         }),
     }
 }
+
+/// Thickness of the running indicator - the stroke along the screen edge under the icon of a
+/// running app, as on the Windows 11 taskbar. The theme carries no entry for it, so the size is
+/// a constant of this component, one for every panel size and look, and is written down in
+/// `.doc/panel/03-appearance.md`. The stroke sits right against the icon, and its thickness is
+/// taken out of the padding on the screen edge side.
+const INDICATOR_THICKNESS: f32 = 3.0;
+
+/// Length of the running indicator of an app with a window but without focus.
+const INDICATOR_RUNNING_LENGTH: f32 = 6.0;
+
+/// Length of the running indicator of the focused app.
+const INDICATOR_ACTIVE_LENGTH: f32 = 16.0;
 
 /// Alpha of the Unity progress fill. The theme carries no entry for a wash that lies under
 /// content - every accent surface in it is opaque - so the value stays a constant of this

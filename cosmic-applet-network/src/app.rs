@@ -1944,7 +1944,7 @@ impl cosmic::Application for CosmicNetworkApplet {
                 let mut btn_content = vec![
                     column::with_children([
                         text::body(display_name).into(),
-                        column::with_children([text("Adapter").size(10).into()]).into(),
+                        column::with_children([text(fl!("adapter")).size(10).into()]).into(),
                     ])
                     .width(Length::Fill)
                     .into(),

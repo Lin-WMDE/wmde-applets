@@ -23,5 +23,10 @@ unable-to-connect = Unable to connect to network
 check-wifi-connection = Make sure Wi-Fi is connected to the internet and the password is correct
 reset = Reset
 
+## WMDE: keys of our own, kept at the end of the file
+
 # Tooltip for the icon-only retry button on a failed known network
 retry = Retry
+
+# Caption under the name of each Wi-Fi adapter when the machine has more than one
+adapter = Adapter

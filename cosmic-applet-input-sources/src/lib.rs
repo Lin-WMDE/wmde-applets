@@ -45,6 +45,9 @@ mod wayland;
 static AUTOSIZE_MAIN_ID: LazyLock<widget::Id> = LazyLock::new(|| widget::Id::new("autosize-main"));
 pub const ID: &str = "fun.wmde.AppletInputSources";
 
+/// WMDE: the gettext domain that translates the layout names of xkeyboard-config.
+const XKB_TEXT_DOMAIN: &str = "xkeyboard-config";
+
 pub fn run() -> cosmic::iced::Result {
     let socket = std::env::var("X_PRIVILEGED_WAYLAND_SOCKET")
         .ok()
@@ -60,6 +63,7 @@ pub fn run() -> cosmic::iced::Result {
     };
 
     localize::localize();
+    bind_layout_names();
 
     let layouts = match xkb_data::all_keyboard_layouts() {
         Ok(layouts) => layouts,
@@ -73,6 +77,38 @@ pub fn run() -> cosmic::iced::Result {
         wayland_connection,
         layouts: layouts.layout_list.layout,
     })
+}
+
+/// WMDE: the layout names come out of the catalog as UTF-8 whatever the character type of the
+/// process, so Cyrillic is never transliterated.
+fn bind_layout_names() {
+    if let Err(why) = gettextrs::bind_textdomain_codeset(XKB_TEXT_DOMAIN, "UTF-8") {
+        tracing::warn!("could not set the codeset of {XKB_TEXT_DOMAIN}: {why}");
+    }
+}
+
+/// WMDE: a layout description in the language of the session. xkeyboard-config names layouts
+/// in English and ships a gettext catalog for them, the one the keyboard page of Settings
+/// reads. The catalog is read under a locale set for this call only: a process-wide setlocale
+/// would also turn glibc's own messages, such as the errors in the log, into Ukrainian.
+fn layout_description(description: &str) -> String {
+    // SAFETY: the locale object is created from the environment, installed for this thread
+    // only, and the previous locale is restored before the object is freed.
+    unsafe {
+        let locale = libc::newlocale(
+            libc::LC_MESSAGES_MASK | libc::LC_CTYPE_MASK,
+            c"".as_ptr(),
+            std::ptr::null_mut(),
+        );
+        if locale.is_null() {
+            return description.to_owned();
+        }
+        let previous = libc::uselocale(locale);
+        let translated = gettextrs::dgettext(XKB_TEXT_DOMAIN, description);
+        libc::uselocale(previous);
+        libc::freelocale(locale);
+        translated
+    }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -339,7 +375,7 @@ impl Window {
 
                 if variant.is_empty() {
                     let active_layout = ActiveLayout {
-                        description: xkb_layout.description().to_owned(),
+                        description: layout_description(xkb_layout.description()),
                         layout: layout.to_owned(),
                         variant: variant.to_owned(),
                     };
@@ -358,7 +394,7 @@ impl Window {
                     }
 
                     let active_layout = ActiveLayout {
-                        description: xkb_variant.description().to_owned(),
+                        description: layout_description(xkb_variant.description()),
                         layout: layout.to_owned(),
                         variant: variant.to_owned(),
                     };

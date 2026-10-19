@@ -14,12 +14,3 @@ what-network = Received and sent bytes on every interface except loopback.
 what-swap = Used against total swap.
 what-load = Tasks waiting their turn, averaged over a minute. Not processor load.
 what-disk = Bytes read and written on whole block devices.
-
-size-b = {$value} B
-size-kib = {$value} KiB
-size-mib = {$value} MiB
-size-gib = {$value} GiB
-
-rate-b = {$value} B/s
-rate-kib = {$value} KiB/s
-rate-mib = {$value} MiB/s

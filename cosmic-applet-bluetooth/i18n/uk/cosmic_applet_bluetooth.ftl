@@ -1,7 +1,7 @@
 bluetooth = Bluetooth
 other-devices = Інші пристрої Bluetooth
 settings = Налаштування Bluetooth...
-connected = З'єднано
+connected = Зʼєднано
 confirm-pin = Підтвердіть, що вказаний PIN-код збігається з тим, що показано на { $deviceName }
 confirm = Підтвердити
 cancel = Скасувати
