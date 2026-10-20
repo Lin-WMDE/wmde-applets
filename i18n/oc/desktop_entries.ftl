@@ -45,3 +45,6 @@ cosmic-applet-status-area-comment = Indicadors d’aplicacions que pòdon export
 cosmic-applet-status-area-keywords = WMDE;Applet;App;Indicador;Indicator;Notificacion;Panèl;Estatut;
 cosmic-panel-workspaces-button-comment = Dobrir la vista generala dels espacis de trabalh per gerir e bascular d'espaci de trabalh
 cosmic-panel-workspaces-button-keywords = WMDE;Applet;Espaci de trabalh;Vista generala;
+cosmic-applet-tiling-comment = Gerir l’indicacion de la fenèstra activa e lo mosaïc automatic actual o per espaci de trabalh
+cosmic-panel-app-button-keywords = WMDE;Applet;Appli;Aplicacion;Bibliotèca;Tirador;
+cosmic-panel-launcher-button-keywords = WMDE;Applet;Aviador;Executar;Lançar;
